@@ -3,19 +3,19 @@
     "UserPromptSubmit": [
       {
         "type": "command",
-        "command": "powershell.exe -ExecutionPolicy Bypass -Command \"Add-Content -Path '.github/hooks/agent_log.txt' -Value \\\"[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] USER: $input\\\"\""
+        "command": "powershell.exe -ExecutionPolicy Bypass -Command \"$input | Add-Content -Path '.github/hooks/agent_log.txt' -Encoding UTF8\""
       }
     ],
-    "preToolUse": [
+    "PreToolUse": [
       {
         "type": "command",
-        "command": "powershell.exe -ExecutionPolicy Bypass -Command \"Add-Content -Path '.github/hooks/agent_log.txt' -Value \\\"[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] TOOL: $input\\\"\""
+        "command": "powershell.exe -ExecutionPolicy Bypass -Command \"$input | Add-Content -Path '.github/hooks/agent_log.txt' -Encoding UTF8\""
       }
     ],
-    "postToolUse": [
+    "PostToolUse": [
       {
         "type": "command",
-        "command": "powershell.exe -ExecutionPolicy Bypass -Command \"Add-Content -Path '.github/hooks/agent_log.txt' -Value \\\"[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] RESULT: $input\\\"\""
+        "command": "powershell.exe -ExecutionPolicy Bypass -Command \"$input | Add-Content -Path '.github/hooks/agent_log.txt' -Encoding UTF8\""
       }
     ]
   }
