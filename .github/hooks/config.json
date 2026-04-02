@@ -3,19 +3,19 @@
     "UserPromptSubmit": [
       {
         "type": "command",
-        "command": "powershell.exe -ExecutionPolicy Bypass -Command \"$timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'; $input | ForEach-Object { \\\"[$timestamp] USER_QUESTION: $_\\\" | Add-Content -Path '.github/hooks/agent_log.txt' -Encoding UTF8 }\""
+        "command": "powershell.exe -ExecutionPolicy Bypass -Command \"$timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'; $input | ForEach-Object { \\\"[$timestamp] USER_QUESTION: $_\\\" | Add-Content -Path 'c:\\Petar\\TVZ\\6. semestar\\Razvoj web aplikacija u ASP.NET MVC tehnologiji\\Projekt\\projekt\\.github\\hooks\\agent_log.txt' -Encoding UTF8 }\""
       }
     ],
     "PreToolUse": [
       {
         "type": "command",
-        "command": "powershell.exe -ExecutionPolicy Bypass -Command \"$timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'; $input | ForEach-Object { \\\"[$timestamp] TOOL_USED: $_\\\" | Add-Content -Path '.github/hooks/agent_log.txt' -Encoding UTF8 }\""
+        "command": "powershell.exe -ExecutionPolicy Bypass -Command \"$timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'; $input | ForEach-Object { \\\"[$timestamp] TOOL_USED: $_\\\" | Add-Content -Path 'c:\\Petar\\TVZ\\6. semestar\\Razvoj web aplikacija u ASP.NET MVC tehnologiji\\Projekt\\projekt\\.github\\hooks\\agent_log.txt' -Encoding UTF8 }\""
       }
     ],
     "PostToolUse": [
       {
         "type": "command",
-        "command": "powershell.exe -ExecutionPolicy Bypass -Command \"$timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'; $input | ForEach-Object { \\\"[$timestamp] TOOL_RESULT: $_\\\" | Add-Content -Path '.github/hooks/agent_log.txt' -Encoding UTF8 }\""
+        "command": "powershell.exe -ExecutionPolicy Bypass -Command \"$timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'; $input | ForEach-Object { \\\"[$timestamp] TOOL_RESULT: $_\\\" | Add-Content -Path 'c:\\Petar\\TVZ\\6. semestar\\Razvoj web aplikacija u ASP.NET MVC tehnologiji\\Projekt\\projekt\\.github\\hooks\\agent_log.txt' -Encoding UTF8 }\""
       }
     ]
   }
