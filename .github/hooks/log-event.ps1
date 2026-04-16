@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 
 function Get-PropValue {
     param(
@@ -183,20 +183,6 @@ switch ($eventName) {
             if ($isUxSubagentCall) {
                 New-Item -ItemType File -Path $uxSpawnedFlag -Force | Out-Null
             }
-
-            $isEditingTool = $toolName -in @('apply_patch', 'create_file', 'edit_notebook_file')
-            $uxWasSpawned = Test-Path $uxSpawnedFlag
-
-            if ($isEditingTool -and (-not $uxWasSpawned)) {
-                $line = "[$timeStamp] AGENT: Blocked UI edit tool '$toolName' until UXAgent is spawned"
-                $hookOutput = @{
-                    hookSpecificOutput = @{
-                        hookEventName = 'PreToolUse'
-                        permissionDecision = 'deny'
-                        permissionDecisionReason = 'UI task detected. Spawn UXAgent via runSubagent before editing UI code.'
-                    }
-                }
-            }
         }
     }
     'SubagentStart' {
@@ -269,3 +255,4 @@ Add-Content -Path $logPath -Value $line -Encoding UTF8
 $hookOutput | ConvertTo-Json -Compress
 
 exit 0
+
