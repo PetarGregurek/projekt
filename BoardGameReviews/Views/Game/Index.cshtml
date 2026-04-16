@@ -1,0 +1,261 @@
+@model BoardGameReviews.Models.GameIndexViewModel
+
+@{
+    ViewData["Title"] = "Game Data Hub";
+}
+
+<section class="game-page game-list-page">
+    <div class="game-hero mb-4">
+        <p class="eyebrow mb-2">BoardGameReviews</p>
+        <h1 class="mb-2">Game Data Hub</h1>
+        <p class="mb-3">Pregled svih entiteta iz SampleData (`Game`, `Category`, `GameType`, `Publisher`, `User`, `Review`, `Event`) s linkom na detalje svakog zapisa.</p>
+        <div class="entity-nav d-flex flex-wrap gap-2">
+            <a class="btn btn-sm game-btn-outline" href="#games">Games (@Model.Games.Count)</a>
+            <a class="btn btn-sm game-btn-outline" href="#categories">Categories (@Model.Categories.Count)</a>
+            <a class="btn btn-sm game-btn-outline" href="#types">Game Types (@Model.GameTypes.Count)</a>
+            <a class="btn btn-sm game-btn-outline" href="#publishers">Publishers (@Model.Publishers.Count)</a>
+            <a class="btn btn-sm game-btn-outline" href="#users">Users (@Model.Users.Count)</a>
+            <a class="btn btn-sm game-btn-outline" href="#reviews">Reviews (@Model.Reviews.Count)</a>
+            <a class="btn btn-sm game-btn-outline" href="#events">Events (@Model.Events.Count)</a>
+        </div>
+    </div>
+
+    <div id="games" class="entity-block game-table-wrap mb-4">
+        <div class="entity-header">Games</div>
+        <div class="table-responsive">
+            <table class="table game-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Game</th>
+                        <th>Year</th>
+                        <th>Players</th>
+                        <th>Difficulty</th>
+                        <th>Type</th>
+                        <th>Publisher</th>
+                        <th>Category</th>
+                        <th>Reviews</th>
+                        <th>Avg. Rating</th>
+                        <th>Events</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Games)
+                    {
+                        var difficultyClass = item.Game.Difficulty switch
+                        {
+                            Difficulty.Easy => "difficulty-easy",
+                            Difficulty.Medium => "difficulty-medium",
+                            _ => "difficulty-hard"
+                        };
+
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">@item.Game.Name</div>
+                                <div class="small text-secondary">@item.Game.Description</div>
+                            </td>
+                            <td>@item.Game.YearPublished</td>
+                            <td>@item.Game.MinPlayers - @item.Game.MaxPlayers</td>
+                            <td><span class="difficulty-pill @difficultyClass">@item.Game.Difficulty</span></td>
+                            <td>@item.GameTypeName</td>
+                            <td>@item.PublisherName</td>
+                            <td>@item.CategoryName</td>
+                            <td>@item.ReviewCount</td>
+                            <td>@(item.AverageRating?.ToString("0.0") ?? "N/A")</td>
+                            <td>@item.EventCount</td>
+                            <td>
+                                <a asp-controller="Game" asp-action="Details" asp-route-entity="game" asp-route-id="@item.Game.Id" class="btn btn-sm game-btn-primary">Detalji</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="categories" class="entity-block game-table-wrap mb-4">
+        <div class="entity-header">Categories</div>
+        <div class="table-responsive">
+            <table class="table game-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Age Group</th>
+                        <th>Difficulty</th>
+                        <th>Popularity</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var category in Model.Categories)
+                    {
+                        <tr>
+                            <td>@category.Name</td>
+                            <td>@category.Description</td>
+                            <td>@category.AgeGroup</td>
+                            <td>@category.Difficulty</td>
+                            <td>@category.Popularity</td>
+                            <td>
+                                <a asp-controller="Game" asp-action="Details" asp-route-entity="category" asp-route-id="@category.Id" class="btn btn-sm game-btn-primary">Detalji</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="types" class="entity-block game-table-wrap mb-4">
+        <div class="entity-header">Game Types</div>
+        <div class="table-responsive">
+            <table class="table game-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var gameType in Model.GameTypes)
+                    {
+                        <tr>
+                            <td>@gameType.Name</td>
+                            <td>@gameType.Description</td>
+                            <td>
+                                <a asp-controller="Game" asp-action="Details" asp-route-entity="gametype" asp-route-id="@gameType.Id" class="btn btn-sm game-btn-primary">Detalji</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="publishers" class="entity-block game-table-wrap mb-4">
+        <div class="entity-header">Publishers</div>
+        <div class="table-responsive">
+            <table class="table game-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Country</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var publisher in Model.Publishers)
+                    {
+                        <tr>
+                            <td>@publisher.Name</td>
+                            <td>@publisher.Country</td>
+                            <td>
+                                <a asp-controller="Game" asp-action="Details" asp-route-entity="publisher" asp-route-id="@publisher.Id" class="btn btn-sm game-btn-primary">Detalji</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="users" class="entity-block game-table-wrap mb-4">
+        <div class="entity-header">Users</div>
+        <div class="table-responsive">
+            <table class="table game-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Country</th>
+                        <th>Age</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model.Users)
+                    {
+                        <tr>
+                            <td>@user.Username</td>
+                            <td>@user.Email</td>
+                            <td>@user.Country</td>
+                            <td>@user.Age</td>
+                            <td>
+                                <a asp-controller="Game" asp-action="Details" asp-route-entity="user" asp-route-id="@user.Id" class="btn btn-sm game-btn-primary">Detalji</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="reviews" class="entity-block game-table-wrap mb-4">
+        <div class="entity-header">Reviews</div>
+        <div class="table-responsive">
+            <table class="table game-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Rating</th>
+                        <th>Game</th>
+                        <th>User</th>
+                        <th>Recommended</th>
+                        <th>Date</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var reviewItem in Model.Reviews)
+                    {
+                        <tr>
+                            <td>@reviewItem.Review.Title</td>
+                            <td>@reviewItem.Review.Rating</td>
+                            <td>@reviewItem.GameName</td>
+                            <td>@reviewItem.Username</td>
+                            <td>@(reviewItem.Review.IsRecommended ? "Da" : "Ne")</td>
+                            <td>@reviewItem.Review.CreatedAt.ToString("dd.MM.yyyy")</td>
+                            <td>
+                                <a asp-controller="Game" asp-action="Details" asp-route-entity="review" asp-route-id="@reviewItem.Review.Id" class="btn btn-sm game-btn-primary">Detalji</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="events" class="entity-block game-table-wrap">
+        <div class="entity-header">Events</div>
+        <div class="table-responsive">
+            <table class="table game-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Game</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Location</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var eventItem in Model.Events)
+                    {
+                        <tr>
+                            <td>@eventItem.Event.Name</td>
+                            <td>@eventItem.GameName</td>
+                            <td>@eventItem.Event.StartDateTime.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>@eventItem.Event.EndDateTime.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>@eventItem.Event.Location</td>
+                            <td>
+                                <a asp-controller="Game" asp-action="Details" asp-route-entity="event" asp-route-id="@eventItem.Event.Id" class="btn btn-sm game-btn-primary">Detalji</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

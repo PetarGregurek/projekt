@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap');
+
 html {
   font-size: 14px;
 }
@@ -19,4 +21,13 @@ html {
 
 body {
   margin-bottom: 60px;
+  font-family: 'Archivo', 'Segoe UI', sans-serif;
+  background: radial-gradient(circle at 0% 0%, #fff4e8 0%, #f6f9fc 38%, #eef5fa 100%);
+  color: #17212b;
 }
+
+h1, h2, h3, h4 {
+  font-family: 'Fraunces', Georgia, serif;
+  letter-spacing: 0.2px;
+}
+

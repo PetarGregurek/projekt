@@ -1,8 +1,99 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model BoardGameReviews.Models.HomeIndexViewModel
+
+@{
+    ViewData["Title"] = "BoardGameReviews";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />
+}
+
+<section class="home-stage">
+    <div class="home-hero-grid">
+        <article class="home-hero-card">
+            <p class="home-kicker">Community Picks</p>
+            <h1>Pronađi svoju sljedeću omiljenu društvenu igru.</h1>
+            <p class="home-lead">Istraži recenzije, događaje i top naslove kroz jednu preglednu početnu stranicu.</p>
+            <div class="home-cta-row">
+                <a class="btn home-btn-main" asp-controller="Game" asp-action="Index">Pogledaj sve igre</a>
+                <a class="btn home-btn-sub" asp-controller="Game" asp-action="Details" asp-route-id="1">Otvori primjer detalja</a>
+            </div>
+        </article>
+
+        <aside class="home-stats-card">
+            <h2>Pregled platforme</h2>
+            <ul>
+                <li><span>Igre</span><strong>@Model.TotalGames</strong></li>
+                <li><span>Recenzije</span><strong>@Model.TotalReviews</strong></li>
+                <li><span>Korisnici</span><strong>@Model.TotalUsers</strong></li>
+                <li><span>Događaji</span><strong>@Model.TotalEvents</strong></li>
+            </ul>
+        </aside>
+    </div>
+
+    <section class="home-section">
+        <div class="home-section-head">
+            <h2>Top ocijenjene igre</h2>
+            <p>Temeljeno na prosjeku ocjena iz postojećih recenzija.</p>
+        </div>
+        <div class="home-top-grid">
+            @foreach (var item in Model.TopGames)
+            {
+                <article class="home-top-card">
+                    <h3>@item.Game.Name</h3>
+                    <p class="home-top-meta">@item.PublisherName • @item.Game.YearPublished</p>
+                    <p>@item.Game.Description</p>
+                    <div class="home-top-foot">
+                        <span>@item.AverageRating.ToString("0.0") / 5</span>
+                        <span>@item.ReviewCount recenzija</span>
+                    </div>
+                    <a asp-controller="Game" asp-action="Details" asp-route-id="@item.Game.Id">Detalji igre</a>
+                </article>
+            }
+        </div>
+    </section>
+
+    <section class="home-section home-split">
+        <article class="home-timeline">
+            <div class="home-section-head">
+                <h2>Aktivni i nadolazeći događaji</h2>
+            </div>
+
+            @if (Model.UpcomingEvents.Count == 0)
+            {
+                <p class="home-empty">Trenutno nema aktivnih događaja.</p>
+            }
+            else
+            {
+                <ul>
+                    @foreach (var item in Model.UpcomingEvents)
+                    {
+                        <li>
+                            <time>@item.Event.StartDateTime.ToString("dd.MM.yyyy HH:mm")</time>
+                            <div>
+                                <strong>@item.Event.Name</strong>
+                                <p>@item.GameName • @item.Event.Location</p>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            }
+        </article>
+
+        <article class="home-categories">
+            <div class="home-section-head">
+                <h2>Popularne kategorije</h2>
+            </div>
+            <div class="home-chip-wrap">
+                @foreach (var item in Model.PopularCategories)
+                {
+                    <div class="home-chip">
+                        <strong>@item.Category.Name</strong>
+                        <span>@item.ReviewCount recenzija</span>
+                        <small>@item.Category.AgeGroup • @item.Category.Difficulty</small>
+                    </div>
+                }
+            </div>
+        </article>
+    </section>
+</section>

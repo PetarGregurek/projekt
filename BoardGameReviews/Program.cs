@@ -150,6 +150,7 @@ Console.WriteLine("\n═══════════════════�
 
 builder.Services.AddSingleton(gameTypes);
 builder.Services.AddSingleton(publishers);
+builder.Services.AddSingleton(categories);
 builder.Services.AddSingleton(games);
 builder.Services.AddSingleton(users);
 builder.Services.AddSingleton(reviews);
