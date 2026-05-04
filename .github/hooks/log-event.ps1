@@ -74,6 +74,22 @@ function Compact-Json {
     }
 }
 
+function Append-PayloadSuffix {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$BaseLine,
+        [Parameter(Mandatory = $true)]
+        [string]$PayloadSummary,
+        [bool]$IncludePayload = $true
+    )
+
+    if (-not $IncludePayload) {
+        return $BaseLine
+    }
+
+    return "$BaseLine | payload=$PayloadSummary"
+}
+
 $rawInput = [Console]::In.ReadToEnd()
 if ([string]::IsNullOrWhiteSpace($rawInput)) {
     exit 0
@@ -100,7 +116,7 @@ if ([string]::IsNullOrWhiteSpace($eventName)) {
 $timeStamp = (Get-Date).ToString('yyyy-MM-dd HH:mm:ss')
 
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-$logPath = Join-Path $repoRoot 'lab-2\agent_log.txt'
+$logPath = Join-Path $repoRoot 'lab-3\agent-log.txt'
 $logDir = Split-Path -Parent $logPath
 $stateDir = Join-Path $repoRoot '.github\hooks\.state'
 $uiRequiredFlag = Join-Path $stateDir 'ui-required.flag'
@@ -117,6 +133,7 @@ if (-not (Test-Path $stateDir)) {
 
 $line = $null
 $hookOutput = @{ continue = $true }
+$includePayload = $true
 
 switch ($eventName) {
     'UserPromptSubmit' {
@@ -248,6 +265,9 @@ switch ($eventName) {
         $line = "[$timeStamp] AGENT: Event $eventName -> $(Compact-Json -InputObject $payload -MaxLen 300)"
     }
 }
+
+$payloadSummary = Compact-Json -InputObject $payload -MaxLen 220
+$line = Append-PayloadSuffix -BaseLine $line -PayloadSummary $payloadSummary -IncludePayload $includePayload
 
 Add-Content -Path $logPath -Value $line -Encoding UTF8
 
