@@ -1,6 +1,10 @@
 using BoardGameReviews.Models;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+{
+    Args = args,
+    ContentRootPath = ResolveContentRootPath()
+});
 
 builder.Services.AddControllersWithViews();
 
@@ -178,3 +182,24 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
+static string ResolveContentRootPath()
+{
+    var currentDirectory = AppContext.BaseDirectory;
+    var directory = new DirectoryInfo(currentDirectory);
+
+    while (directory != null)
+    {
+        var projectFilePath = Path.Combine(directory.FullName, "BoardGameReviews.csproj");
+        var webRootPath = Path.Combine(directory.FullName, "wwwroot");
+
+        if (File.Exists(projectFilePath) && Directory.Exists(webRootPath))
+        {
+            return directory.FullName;
+        }
+
+        directory = directory.Parent;
+    }
+
+    return Directory.GetCurrentDirectory();
+}
