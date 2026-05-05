@@ -1,3 +1,4 @@
+using BoardGameReviews.Data;
 using BoardGameReviews.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -5,73 +6,54 @@ namespace BoardGameReviews.Controllers
 {
     public class GameController : Controller
     {
-        private readonly List<Game> _games;
-        private readonly List<GameType> _gameTypes;
-        private readonly List<Publisher> _publishers;
-        private readonly List<Category> _categories;
-        private readonly List<Review> _reviews;
-        private readonly List<User> _users;
-        private readonly List<Event> _events;
+        private readonly IBoardGameRepository _repo;
 
-        public GameController(
-            List<Game> games,
-            List<GameType> gameTypes,
-            List<Publisher> publishers,
-            List<Category> categories,
-            List<Review> reviews,
-            List<User> users,
-            List<Event> events)
+        public GameController(IBoardGameRepository repo)
         {
-            _games = games;
-            _gameTypes = gameTypes;
-            _publishers = publishers;
-            _categories = categories;
-            _reviews = reviews;
-            _users = users;
-            _events = events;
+            _repo = repo;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            var games      = await _repo.GetAllGamesAsync();
+            var categories = await _repo.GetAllCategoriesAsync();
+            var gameTypes  = await _repo.GetAllGameTypesAsync();
+            var publishers = await _repo.GetAllPublishersAsync();
+            var users      = await _repo.GetAllUsersAsync();
+            var reviews    = await _repo.GetAllReviewsAsync();
+            var events     = await _repo.GetAllEventsAsync();
+
             var model = new GameIndexViewModel
             {
-                Games = _games
-                    .Select(g =>
+                Games = games
+                    .Select(g => new GameListItemViewModel
                     {
-                        var gameReviews = _reviews.Where(r => r.GameId == g.Id).ToList();
-
-                        return new GameListItemViewModel
-                        {
-                            Game = g,
-                            GameTypeName = _gameTypes.FirstOrDefault(t => t.Id == g.GameTypeId)?.Name,
-                            PublisherName = _publishers.FirstOrDefault(p => p.Id == g.PublisherId)?.Name,
-                            CategoryName = _categories.FirstOrDefault(c => c.Id == g.CategoryId)?.Name,
-                            ReviewCount = gameReviews.Count,
-                            AverageRating = gameReviews.Count > 0 ? gameReviews.Average(r => r.Rating) : null,
-                            EventCount = _events.Count(e => e.GameId == g.Id)
-                        };
+                        Game          = g,
+                        GameTypeName  = g.GameType?.Name,
+                        PublisherName = g.Publisher?.Name,
+                        CategoryName  = g.Category?.Name,
+                        ReviewCount   = g.Reviews.Count,
+                        AverageRating = g.Reviews.Count > 0 ? g.Reviews.Average(r => r.Rating) : null,
+                        EventCount    = g.Events.Count
                     })
-                    .OrderBy(x => x.Game.Name)
                     .ToList(),
-                Categories = _categories.OrderBy(c => c.Name).ToList(),
-                GameTypes = _gameTypes.OrderBy(t => t.Name).ToList(),
-                Publishers = _publishers.OrderBy(p => p.Name).ToList(),
-                Users = _users.OrderBy(u => u.Username).ToList(),
-                Reviews = _reviews
-                    .OrderByDescending(r => r.CreatedAt)
+                Categories = categories,
+                GameTypes  = gameTypes,
+                Publishers = publishers,
+                Users      = users,
+                Reviews    = reviews
                     .Select(r => new ReviewListItemViewModel
                     {
-                        Review = r,
-                        GameName = _games.FirstOrDefault(g => g.Id == r.GameId)?.Name,
-                        Username = _users.FirstOrDefault(u => u.Id == r.UserId)?.Username
+                        Review   = r,
+                        GameName = r.Game?.Name,
+                        Username = r.User?.Username
                     })
                     .ToList(),
-                Events = _events
-                    .OrderBy(e => e.StartDateTime)
+                Events = events
                     .Select(e => new EventListItemViewModel
                     {
-                        Event = e,
-                        GameName = _games.FirstOrDefault(g => g.Id == e.GameId)?.Name
+                        Event    = e,
+                        GameName = e.Game?.Name
                     })
                     .ToList()
             };
@@ -79,111 +61,79 @@ namespace BoardGameReviews.Controllers
             return View(model);
         }
 
-        public IActionResult Details(int id, string entity = "game")
+        public async Task<IActionResult> Details(int id, string entity = "game")
         {
             var normalizedEntity = (entity ?? "game").Trim().ToLowerInvariant();
             var model = new EntityDetailsViewModel
             {
                 EntityType = normalizedEntity,
-                EntityId = id
+                EntityId   = id
             };
 
             switch (normalizedEntity)
             {
                 case "game":
                 {
-                    var game = _games.FirstOrDefault(g => g.Id == id);
-                    if (game == null)
-                    {
-                        return NotFound();
-                    }
-
+                    var game = await _repo.GetGameWithDetailsAsync(id);
+                    if (game == null) return NotFound();
                     model.GameDetails = BuildGameDetails(game);
                     break;
                 }
                 case "category":
                 {
-                    model.Category = _categories.FirstOrDefault(c => c.Id == id);
-                    if (model.Category == null)
-                    {
-                        return NotFound();
-                    }
-
-                    model.CategoryGames = _games
-                        .Where(g => g.CategoryId == id)
-                        .OrderBy(g => g.Name)
-                        .ToList();
+                    var category = await _repo.GetCategoryWithGamesAsync(id);
+                    if (category == null) return NotFound();
+                    model.Category      = category;
+                    model.CategoryGames = category.Games.OrderBy(g => g.Name).ToList();
                     break;
                 }
                 case "gametype":
                 {
-                    model.GameType = _gameTypes.FirstOrDefault(t => t.Id == id);
-                    if (model.GameType == null)
-                    {
-                        return NotFound();
-                    }
-
-                    model.GameTypeGames = _games
-                        .Where(g => g.GameTypeId == id)
-                        .OrderBy(g => g.Name)
-                        .ToList();
+                    var gameType = await _repo.GetGameTypeWithGamesAsync(id);
+                    if (gameType == null) return NotFound();
+                    model.GameType      = gameType;
+                    model.GameTypeGames = gameType.Games.OrderBy(g => g.Name).ToList();
                     break;
                 }
                 case "publisher":
                 {
-                    model.Publisher = _publishers.FirstOrDefault(p => p.Id == id);
-                    if (model.Publisher == null)
-                    {
-                        return NotFound();
-                    }
-
-                    model.PublisherGames = _games
-                        .Where(g => g.PublisherId == id)
-                        .OrderBy(g => g.Name)
-                        .ToList();
+                    var publisher = await _repo.GetPublisherWithGamesAsync(id);
+                    if (publisher == null) return NotFound();
+                    model.Publisher      = publisher;
+                    model.PublisherGames = publisher.Games.OrderBy(g => g.Name).ToList();
                     break;
                 }
                 case "user":
                 {
-                    model.User = _users.FirstOrDefault(u => u.Id == id);
-                    if (model.User == null)
-                    {
-                        return NotFound();
-                    }
-
-                    model.UserReviews = _reviews
-                        .Where(r => r.UserId == id)
+                    var user = await _repo.GetUserWithReviewsAsync(id);
+                    if (user == null) return NotFound();
+                    model.User        = user;
+                    model.UserReviews = user.Reviews
                         .OrderByDescending(r => r.CreatedAt)
                         .Select(r => new ReviewListItemViewModel
                         {
-                            Review = r,
-                            GameName = _games.FirstOrDefault(g => g.Id == r.GameId)?.Name,
-                            Username = model.User.Username
+                            Review   = r,
+                            GameName = r.Game?.Name,
+                            Username = user.Username
                         })
                         .ToList();
                     break;
                 }
                 case "review":
                 {
-                    model.Review = _reviews.FirstOrDefault(r => r.Id == id);
-                    if (model.Review == null)
-                    {
-                        return NotFound();
-                    }
-
-                    model.ReviewGame = _games.FirstOrDefault(g => g.Id == model.Review.GameId);
-                    model.ReviewUser = _users.FirstOrDefault(u => u.Id == model.Review.UserId);
+                    var review = await _repo.GetReviewWithDetailsAsync(id);
+                    if (review == null) return NotFound();
+                    model.Review     = review;
+                    model.ReviewGame = review.Game;
+                    model.ReviewUser = review.User;
                     break;
                 }
                 case "event":
                 {
-                    model.Event = _events.FirstOrDefault(e => e.Id == id);
-                    if (model.Event == null)
-                    {
-                        return NotFound();
-                    }
-
-                    model.EventGame = _games.FirstOrDefault(g => g.Id == model.Event.GameId);
+                    var evt = await _repo.GetEventWithGameAsync(id);
+                    if (evt == null) return NotFound();
+                    model.Event     = evt;
+                    model.EventGame = evt.Game;
                     break;
                 }
                 default:
@@ -193,32 +143,22 @@ namespace BoardGameReviews.Controllers
             return View(model);
         }
 
-        private GameDetailsViewModel BuildGameDetails(Game game)
+        private static GameDetailsViewModel BuildGameDetails(Game game)
         {
-            var gameReviews = _reviews
-                .Where(r => r.GameId == game.Id)
-                .Select(r => new ReviewWithUserViewModel
-                {
-                    Review = r,
-                    User = _users.FirstOrDefault(u => u.Id == r.UserId)
-                })
+            var reviews = game.Reviews
+                .Select(r => new ReviewWithUserViewModel { Review = r, User = r.User })
                 .OrderByDescending(x => x.Review.CreatedAt)
-                .ToList();
-
-            var gameEvents = _events
-                .Where(e => e.GameId == game.Id)
-                .OrderBy(e => e.StartDateTime)
                 .ToList();
 
             return new GameDetailsViewModel
             {
-                Game = game,
-                GameType = _gameTypes.FirstOrDefault(t => t.Id == game.GameTypeId),
-                Publisher = _publishers.FirstOrDefault(p => p.Id == game.PublisherId),
-                Category = _categories.FirstOrDefault(c => c.Id == game.CategoryId),
-                Reviews = gameReviews,
-                Events = gameEvents,
-                AverageRating = gameReviews.Count > 0 ? gameReviews.Average(x => x.Review.Rating) : null
+                Game          = game,
+                GameType      = game.GameType,
+                Publisher     = game.Publisher,
+                Category      = game.Category,
+                Reviews       = reviews,
+                Events        = game.Events.OrderBy(e => e.StartDateTime).ToList(),
+                AverageRating = reviews.Count > 0 ? reviews.Average(x => x.Review.Rating) : null
             };
         }
     }

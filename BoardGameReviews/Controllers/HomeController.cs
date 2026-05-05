@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using BoardGameReviews.Data;
 using BoardGameReviews.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,82 +8,49 @@ namespace BoardGameReviews.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly List<Game> _games;
-        private readonly List<Review> _reviews;
-        private readonly List<User> _users;
-        private readonly List<Event> _events;
-        private readonly List<Category> _categories;
-        private readonly List<Publisher> _publishers;
+        private readonly IBoardGameRepository _repo;
 
-        public HomeController(
-            ILogger<HomeController> logger,
-            List<Game> games,
-            List<Review> reviews,
-            List<User> users,
-            List<Event> events,
-            List<Category> categories,
-            List<Publisher> publishers)
+        public HomeController(ILogger<HomeController> logger, IBoardGameRepository repo)
         {
             _logger = logger;
-            _games = games;
-            _reviews = reviews;
-            _users = users;
-            _events = events;
-            _categories = categories;
-            _publishers = publishers;
+            _repo   = repo;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var topGames = _games
-                .Select(g =>
-                {
-                    var gameReviews = _reviews.Where(r => r.GameId == g.Id).ToList();
-                    var averageRating = gameReviews.Count > 0 ? gameReviews.Average(r => r.Rating) : 0;
-
-                    return new HomeTopGameViewModel
-                    {
-                        Game = g,
-                        AverageRating = averageRating,
-                        ReviewCount = gameReviews.Count,
-                        PublisherName = _publishers.FirstOrDefault(p => p.Id == g.PublisherId)?.Name
-                    };
-                })
-                .OrderByDescending(x => x.AverageRating)
-                .ThenByDescending(x => x.ReviewCount)
-                .Take(3)
-                .ToList();
-
-            var upcomingEvents = _events
-                .Where(e => e.EndDateTime >= DateTime.Now)
-                .OrderBy(e => e.StartDateTime)
-                .Take(4)
-                .Select(e => new HomeEventViewModel
-                {
-                    Event = e,
-                    GameName = _games.FirstOrDefault(g => g.Id == e.GameId)?.Name
-                })
-                .ToList();
-
-            var popularCategories = _categories
-                .Select(c => new HomeCategoryViewModel
-                {
-                    Category = c,
-                    ReviewCount = _reviews.Count(r => _games.Any(g => g.Id == r.GameId && g.CategoryId == c.Id))
-                })
-                .OrderByDescending(x => x.ReviewCount)
-                .Take(3)
-                .ToList();
+            var topGames          = await _repo.GetTopRatedGamesAsync(3);
+            var upcomingEvents    = await _repo.GetUpcomingEventsAsync(4);
+            var popularCategories = await _repo.GetPopularCategoriesAsync(3);
 
             var model = new HomeIndexViewModel
             {
-                TotalGames = _games.Count,
-                TotalReviews = _reviews.Count,
-                TotalUsers = _users.Count,
-                TotalEvents = _events.Count,
-                TopGames = topGames,
-                UpcomingEvents = upcomingEvents,
+                TotalGames    = await _repo.CountGamesAsync(),
+                TotalReviews  = await _repo.CountReviewsAsync(),
+                TotalUsers    = await _repo.CountUsersAsync(),
+                TotalEvents   = await _repo.CountEventsAsync(),
+                TopGames = topGames
+                    .Select(g => new HomeTopGameViewModel
+                    {
+                        Game          = g,
+                        AverageRating = g.Reviews.Count > 0 ? g.Reviews.Average(r => r.Rating) : 0,
+                        ReviewCount   = g.Reviews.Count,
+                        PublisherName = g.Publisher?.Name
+                    })
+                    .ToList(),
+                UpcomingEvents = upcomingEvents
+                    .Select(e => new HomeEventViewModel
+                    {
+                        Event    = e,
+                        GameName = e.Game?.Name
+                    })
+                    .ToList(),
                 PopularCategories = popularCategories
+                    .Select(c => new HomeCategoryViewModel
+                    {
+                        Category    = c,
+                        ReviewCount = c.Games.Sum(g => g.Reviews.Count)
+                    })
+                    .ToList()
             };
 
             return View(model);
