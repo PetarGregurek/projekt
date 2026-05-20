@@ -69,7 +69,7 @@
                     @foreach (var item in Model.UpcomingEvents)
                     {
                         <li>
-                            <time>@item.Event.StartDateTime.ToString("dd.MM.yyyy HH:mm")</time>
+                            <time>@item.Event.StartDateTime.ToString("g")</time>
                             <div>
                                 <strong>@item.Event.Name</strong>
                                 <p>@item.GameName • @item.Event.Location</p>

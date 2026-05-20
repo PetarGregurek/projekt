@@ -13,8 +13,8 @@ else
         <tr>
             <td><div class="fw-semibold">@item.Event.Name</div></td>
             <td>@item.GameName</td>
-            <td>@item.Event.StartDateTime.ToString("yyyy-MM-dd HH:mm")</td>
-            <td>@item.Event.EndDateTime.ToString("yyyy-MM-dd HH:mm")</td>
+            <td>@item.Event.StartDateTime.ToString("g")</td>
+            <td>@item.Event.EndDateTime.ToString("g")</td>
             <td>@item.Event.Location</td>
             <td>
                 <div class="table-actions">

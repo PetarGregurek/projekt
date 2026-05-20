@@ -72,7 +72,7 @@
                                     <td>@(item.Review.IsRecommended ? "Yes" : "No")</td>
                                     <td>@item.Review.Comment</td>
                                     <td>@item.User?.Username (@item.User?.Country)</td>
-                                    <td>@item.Review.CreatedAt.ToString("dd.MM.yyyy")</td>
+                                    <td>@item.Review.CreatedAt.ToString("d")</td>
                                 </tr>
                             }
                         </tbody>
@@ -96,7 +96,7 @@
                     {
                         <li class="list-group-item">
                             <strong>@evt.Name</strong><br />
-                            @evt.StartDateTime.ToString("dd.MM.yyyy HH:mm") - @evt.EndDateTime.ToString("dd.MM.yyyy HH:mm")<br />
+                            @evt.StartDateTime.ToString("g") - @evt.EndDateTime.ToString("g")<br />
                             @evt.Location
                         </li>
                     }

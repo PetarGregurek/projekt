@@ -17,7 +17,7 @@
         <div class="card-body">
             <p><strong>@Model.Event.Name</strong></p>
             <p>Game: @Model.GameName</p>
-            <p class="mb-4">Date: @Model.Event.StartDateTime.ToString("yyyy-MM-dd HH:mm")</p>
+            <p class="mb-4">Date: @Model.Event.StartDateTime.ToString("g")</p>
 
             <form asp-action="Delete" method="post">
                 <input type="hidden" name="id" value="@Model.Event.Id" />

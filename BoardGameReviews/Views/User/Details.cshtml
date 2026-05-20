@@ -49,7 +49,7 @@
                                     <td>@review.Review.Title</td>
                                     <td>@review.GameName</td>
                                     <td>@review.Review.Rating</td>
-                                    <td>@review.Review.CreatedAt.ToString("dd.MM.yyyy")</td>
+                                    <td>@review.Review.CreatedAt.ToString("d")</td>
                                     <td>
                                         <a asp-controller="Review" asp-action="Details" asp-route-id="@review.Review.Id" class="btn btn-sm game-btn-outline">Open Review</a>
                                     </td>

@@ -20,7 +20,7 @@
             <p><strong>User:</strong> @Model.User?.Username</p>
             <p><strong>Rating:</strong> @Model.Review.Rating / 5</p>
             <p><strong>Recommended:</strong> @(Model.Review.IsRecommended ? "Yes" : "No")</p>
-            <p><strong>Date:</strong> @Model.Review.CreatedAt.ToString("dd.MM.yyyy HH:mm")</p>
+            <p><strong>Date:</strong> @Model.Review.CreatedAt.ToString("g")</p>
             <p class="mb-0"><strong>Comment:</strong> @Model.Review.Comment</p>
         </div>
     </div>

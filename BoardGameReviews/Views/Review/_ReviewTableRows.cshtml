@@ -16,7 +16,7 @@ else
             <td>@item.Username</td>
             <td>@item.Review.Rating / 5</td>
             <td>@(item.Review.IsRecommended ? "Yes" : "No")</td>
-            <td>@item.Review.CreatedAt.ToString("yyyy-MM-dd")</td>
+            <td>@item.Review.CreatedAt.ToString("d")</td>
             <td>
                 <div class="table-actions">
                     <a asp-action="Details" asp-route-id="@item.Review.Id" class="btn btn-sm game-btn-primary">Details</a>

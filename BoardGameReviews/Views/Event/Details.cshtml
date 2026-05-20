@@ -17,8 +17,8 @@
         <div class="card-header">Event</div>
         <div class="card-body">
             <p><strong>Game:</strong> @Model.Game?.Name</p>
-            <p><strong>Start:</strong> @Model.Event.StartDateTime.ToString("dd.MM.yyyy HH:mm")</p>
-            <p><strong>End:</strong> @Model.Event.EndDateTime.ToString("dd.MM.yyyy HH:mm")</p>
+            <p><strong>Start:</strong> @Model.Event.StartDateTime.ToString("g")</p>
+            <p><strong>End:</strong> @Model.Event.EndDateTime.ToString("g")</p>
             <p class="mb-0"><strong>Location:</strong> @Model.Event.Location</p>
         </div>
     </div>
