@@ -54,7 +54,7 @@ namespace BoardGameReviews.Controllers
                 Title = model.Input.Title,
                 Comment = model.Input.Comment,
                 IsRecommended = model.Input.IsRecommended,
-                CreatedAt = model.Input.CreatedAt,
+                CreatedAt = model.Input.CreatedAt ?? DateTime.Now,
                 GameId = model.Input.GameId,
                 UserId = model.Input.UserId
             };
@@ -94,7 +94,7 @@ namespace BoardGameReviews.Controllers
             review.Title = model.Input.Title;
             review.Comment = model.Input.Comment;
             review.IsRecommended = model.Input.IsRecommended;
-            review.CreatedAt = model.Input.CreatedAt;
+            review.CreatedAt = model.Input.CreatedAt ?? DateTime.Now;
             review.GameId = model.Input.GameId;
             review.UserId = model.Input.UserId;
             await _repo.UpdateReviewAsync(review);

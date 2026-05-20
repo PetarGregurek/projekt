@@ -327,6 +327,36 @@ textarea.field-missing {
   box-shadow: 0 0 0 3px rgba(180, 35, 53, 0.2);
 }
 
+/* ── DateTimePicker ──────────────────────────────────────────────────── */
+.dtp-picker {
+  display: flex;
+  flex-direction: column;
+}
+
+.dtp-inputs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dtp-date-input {
+  flex: 1 1 9rem;
+  min-width: 0;
+}
+
+.dtp-time-input {
+  flex: 0 0 5.5rem;
+  min-width: 0;
+}
+
+.dtp-sep {
+  color: #8da7bd;
+  font-weight: 600;
+  flex: 0 0 auto;
+  user-select: none;
+  font-size: 1rem;
+}
+
 
 .game-event-list .list-group-item {
   border-color: #dce7ef;

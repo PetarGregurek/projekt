@@ -359,6 +359,253 @@ const wireAutocompleteDropdowns = () => {
 	});
 };
 
+const wireDateTimePickers = () => {
+	// Detect locale once for all pickers on the page
+	const lang = ((navigator.languages && navigator.languages[0]) || navigator.language || 'hr').toLowerCase();
+	const isHr = lang.startsWith('hr');
+
+	document.querySelectorAll('[data-dtp]').forEach((root) => {
+		if (root.dataset.dtpBound === 'true') {
+			return;
+		}
+
+		root.dataset.dtpBound = 'true';
+
+		const hidden = root.querySelector('[data-dtp-hidden]');
+		const dateInput = root.querySelector('[data-dtp-date]');
+		const timeInput = root.querySelector('[data-dtp-time]');
+		const validation = root.querySelector('[data-dtp-validation]');
+
+		if (!hidden || !dateInput || !timeInput) {
+			return;
+		}
+
+		const isRequired = root.dataset.required === 'true';
+		const requiredMessage = root.dataset.requiredMessage || 'This field is required.';
+
+		// Date display format based on locale
+		dateInput.placeholder = isHr ? 'dd.MM.yyyy' : 'MM/dd/yyyy';
+
+		// ── Parse ISO string (yyyy-MM-ddTHH:mm) ─────────────────────────
+		const parseISO = (iso) => {
+			if (!iso) {
+				return null;
+			}
+
+			const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+			if (!m) {
+				return null;
+			}
+
+			return { year: +m[1], month: +m[2], day: +m[3], hour: +m[4], minute: +m[5] };
+		};
+
+		// ── Format components → display strings ──────────────────────────
+		const formatDateDisplay = ({ day, month, year }) => {
+			const d = String(day).padStart(2, '0');
+			const mo = String(month).padStart(2, '0');
+			return isHr ? `${d}.${mo}.${year}` : `${mo}/${d}/${year}`;
+		};
+
+		const formatTimeDisplay = ({ hour, minute }) =>
+			`${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+
+		// ── Parse user date input ────────────────────────────────────────
+		const parseUserDate = (str) => {
+			const s = (str || '').trim();
+			if (!s) {
+				return null;
+			}
+
+			// Accept . / - or space as separators
+			const parts = s.split(/[\.\/ \-]+/);
+			if (parts.length !== 3) {
+				return null;
+			}
+
+			let day, month, year;
+			if (isHr) {
+				[day, month, year] = parts.map(Number);
+			} else {
+				[month, day, year] = parts.map(Number);
+			}
+
+			if (!day || !month || !year || isNaN(day) || isNaN(month) || isNaN(year)) {
+				return null;
+			}
+
+			// 2-digit year → 20xx
+			if (year < 100) {
+				year += 2000;
+			}
+
+			if (month < 1 || month > 12) {
+				return null;
+			}
+
+			const maxDay = new Date(year, month, 0).getDate();
+			if (day < 1 || day > maxDay) {
+				return null;
+			}
+
+			return { day, month, year };
+		};
+
+		// ── Parse user time input ────────────────────────────────────────
+		const parseUserTime = (str) => {
+			const s = (str || '').trim();
+			if (!s) {
+				return null;
+			}
+
+			const parts = s.split(':');
+			if (parts.length !== 2) {
+				return null;
+			}
+
+			const hour = Number(parts[0]);
+			const minute = Number(parts[1]);
+			if (!Number.isFinite(hour) || !Number.isFinite(minute)) {
+				return null;
+			}
+
+			if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+				return null;
+			}
+
+			return { hour, minute };
+		};
+
+		// ── Build ISO string from parts ──────────────────────────────────
+		const toISO = ({ day, month, year }, { hour, minute }) =>
+			`${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+
+		// ── Sync hidden field from visual inputs ─────────────────────────
+		const updateHidden = () => {
+			const dateStr = dateInput.value.trim();
+			const timeStr = timeInput.value.trim();
+
+			if (!dateStr && !timeStr) {
+				hidden.value = '';
+				return;
+			}
+
+			const dateParts = parseUserDate(dateStr);
+			const timeParts = parseUserTime(timeStr || '00:00');
+			hidden.value = (dateParts && timeParts) ? toISO(dateParts, timeParts) : '';
+		};
+
+		// ── Validation state ─────────────────────────────────────────────
+		const setDtpState = (state, message) => {
+			if (validation) {
+				validation.textContent = message || '';
+				if (state === 'valid') {
+					validation.classList.remove('field-validation-error');
+					validation.classList.add('field-validation-valid');
+				} else {
+					validation.classList.remove('field-validation-valid');
+					validation.classList.add('field-validation-error');
+				}
+			}
+
+			if (state === 'valid') {
+				dateInput.classList.remove('field-missing');
+				timeInput.classList.remove('field-missing');
+				return true;
+			}
+
+			const dateStr = dateInput.value.trim();
+			const timeStr = timeInput.value.trim();
+
+			if (state === 'missing') {
+				dateInput.classList.add('field-missing');
+				timeInput.classList.add('field-missing');
+				shakeField(dateInput);
+			} else {
+				// invalid — mark only the offending part
+				if (!parseUserDate(dateStr) && dateStr) {
+					dateInput.classList.add('field-missing');
+					shakeField(dateInput);
+				}
+
+				if (!parseUserTime(timeStr) && timeStr) {
+					timeInput.classList.add('field-missing');
+					shakeField(timeInput);
+				}
+			}
+
+			return false;
+		};
+
+		const validate = () => {
+			const dateStr = dateInput.value.trim();
+			const timeStr = timeInput.value.trim();
+			const isEmpty = !dateStr && !timeStr;
+
+			if (isEmpty) {
+				return isRequired
+					? setDtpState('missing', requiredMessage)
+					: setDtpState('valid', '');
+			}
+
+			if (!parseUserDate(dateStr)) {
+				return setDtpState('invalid', `Invalid date. Use ${isHr ? 'dd.MM.yyyy' : 'MM/dd/yyyy'}.`);
+			}
+
+			if (timeStr && !parseUserTime(timeStr)) {
+				return setDtpState('invalid', 'Invalid time. Use HH:mm (e.g. 14:30).');
+			}
+
+			return setDtpState('valid', '');
+		};
+
+		// ── Pre-fill from existing ISO value (edit form) ─────────────────
+		const existingISO = hidden.value;
+		if (existingISO) {
+			const parsed = parseISO(existingISO);
+			if (parsed) {
+				dateInput.value = formatDateDisplay(parsed);
+				timeInput.value = formatTimeDisplay(parsed);
+			}
+		}
+
+		// ── Event listeners ──────────────────────────────────────────────
+		dateInput.addEventListener('input', () => {
+			updateHidden();
+			if (dateInput.value.trim()) {
+				dateInput.classList.remove('field-missing');
+			}
+		});
+
+		timeInput.addEventListener('input', () => {
+			updateHidden();
+			if (timeInput.value.trim()) {
+				timeInput.classList.remove('field-missing');
+			}
+		});
+
+		dateInput.addEventListener('blur', () => {
+			updateHidden();
+			validate();
+		});
+
+		timeInput.addEventListener('blur', () => {
+			updateHidden();
+			validate();
+		});
+
+		// ── Register with form submit validator ──────────────────────────
+		const form = root.closest('form');
+		if (form) {
+			if (!form._dtpValidators) {
+				form._dtpValidators = [];
+			}
+
+			form._dtpValidators.push(validate);
+		}
+	});
+};
+
 const wireFormSubmit = () => {
 	document.querySelectorAll('form').forEach((form) => {
 		// Disable browser native validation popups — we handle all validation ourselves
@@ -372,6 +619,10 @@ const wireFormSubmit = () => {
 
 		if (!form._autocompleteValidators) {
 			form._autocompleteValidators = [];
+		}
+
+		if (!form._dtpValidators) {
+			form._dtpValidators = [];
 		}
 
 		form.addEventListener('submit', (event) => {
@@ -397,7 +648,12 @@ const wireFormSubmit = () => {
 				autocompleteValid = validator() && autocompleteValid;
 			});
 
-			if (!jqValid || !nativeValid || !relationValid || !autocompleteValid) {
+			let dtpValid = true;
+			form._dtpValidators.forEach((validator) => {
+				dtpValid = validator() && dtpValid;
+			});
+
+			if (!jqValid || !nativeValid || !relationValid || !autocompleteValid || !dtpValid) {
 				event.preventDefault();
 			}
 		});
@@ -427,6 +683,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	wireAjaxSearch();
 	wireFieldFeedback();
 	wireAutocompleteDropdowns();
+	wireDateTimePickers();
 	wireFormSubmit();
 	applyServerSideValidationStyles();
 

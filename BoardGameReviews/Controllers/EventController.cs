@@ -49,8 +49,8 @@ namespace BoardGameReviews.Controllers
             {
                 Name = model.Input.Name,
                 GameId = model.Input.GameId,
-                StartDateTime = model.Input.StartDateTime,
-                EndDateTime = model.Input.EndDateTime,
+                StartDateTime = model.Input.StartDateTime!.Value,
+                EndDateTime = model.Input.EndDateTime!.Value,
                 Location = model.Input.Location
             };
             await _repo.AddEventAsync(evt);
@@ -84,8 +84,8 @@ namespace BoardGameReviews.Controllers
             if (evt == null) return NotFound();
             evt.Name = model.Input.Name;
             evt.GameId = model.Input.GameId;
-            evt.StartDateTime = model.Input.StartDateTime;
-            evt.EndDateTime = model.Input.EndDateTime;
+            evt.StartDateTime = model.Input.StartDateTime!.Value;
+            evt.EndDateTime = model.Input.EndDateTime!.Value;
             evt.Location = model.Input.Location;
             await _repo.UpdateEventAsync(evt);
             TempData["StatusMessage"] = "Event updated successfully.";
@@ -117,7 +117,8 @@ namespace BoardGameReviews.Controllers
 
         private async Task ValidateEventInputAsync(EventFormInputModel input)
         {
-            if (input.EndDateTime <= input.StartDateTime)
+            if (input.StartDateTime.HasValue && input.EndDateTime.HasValue &&
+                input.EndDateTime.Value <= input.StartDateTime.Value)
                 ModelState.AddModelError("Input.EndDateTime", "End date/time must be after start date/time.");
             var games = await _repo.GetAllGamesAsync();
             if (!games.Any(g => g.Id == input.GameId))

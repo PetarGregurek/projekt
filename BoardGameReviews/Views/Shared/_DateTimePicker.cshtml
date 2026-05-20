@@ -1,0 +1,45 @@
+@model BoardGameReviews.Models.DateTimePickerViewModel
+
+@{
+    var isoValue = Model.Value.HasValue ? Model.Value.Value.ToString("yyyy-MM-ddTHH:mm") : string.Empty;
+    var hasError = !string.IsNullOrWhiteSpace(Model.ValidationMessage);
+    var inputClass = hasError ? "field-missing" : string.Empty;
+}
+
+<div class="dtp-picker"
+     data-dtp
+     data-field-name="@Model.FieldName"
+     data-required="@(Model.IsRequired ? "true" : "false")"
+     data-required-message="@Model.RequiredErrorMessage">
+
+    <label class="form-label" for="@(Model.FieldId)_date">@Model.Label</label>
+
+    @* Hidden input carries the ISO value for model binding *@
+    <input type="hidden"
+           name="@Model.FieldName"
+           id="@Model.FieldId"
+           value="@isoValue"
+           data-dtp-hidden />
+
+    <div class="dtp-inputs">
+        <input type="text"
+               id="@(Model.FieldId)_date"
+               class="form-control dtp-date-input @inputClass"
+               autocomplete="off"
+               maxlength="10"
+               data-dtp-date
+               aria-label="@Model.Label date" />
+        <span class="dtp-sep" aria-hidden="true">–</span>
+        <input type="text"
+               id="@(Model.FieldId)_time"
+               class="form-control dtp-time-input @inputClass"
+               autocomplete="off"
+               placeholder="HH:mm"
+               maxlength="5"
+               data-dtp-time
+               aria-label="@Model.Label time" />
+    </div>
+
+    <span class="text-danger @(hasError ? "field-validation-error" : "field-validation-valid")"
+          data-dtp-validation>@Model.ValidationMessage</span>
+</div>

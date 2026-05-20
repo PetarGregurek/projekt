@@ -16,15 +16,29 @@
     </div>
 
     <div>
-        <label asp-for="Input.StartDateTime" class="form-label"></label>
-        <input asp-for="Input.StartDateTime" class="form-control" type="datetime-local" />
-        <span asp-validation-for="Input.StartDateTime" class="text-danger"></span>
+        @await Html.PartialAsync("_DateTimePicker", new BoardGameReviews.Models.DateTimePickerViewModel
+        {
+            FieldName = "Input.StartDateTime",
+            FieldId = "Input_StartDateTime",
+            Label = "Start Date/Time",
+            Value = Model.Input.StartDateTime,
+            IsRequired = true,
+            RequiredErrorMessage = "Start date/time is required.",
+            ValidationMessage = ViewData.ModelState["Input.StartDateTime"]?.Errors.FirstOrDefault()?.ErrorMessage
+        })
     </div>
 
     <div>
-        <label asp-for="Input.EndDateTime" class="form-label"></label>
-        <input asp-for="Input.EndDateTime" class="form-control" type="datetime-local" />
-        <span asp-validation-for="Input.EndDateTime" class="text-danger"></span>
+        @await Html.PartialAsync("_DateTimePicker", new BoardGameReviews.Models.DateTimePickerViewModel
+        {
+            FieldName = "Input.EndDateTime",
+            FieldId = "Input_EndDateTime",
+            Label = "End Date/Time",
+            Value = Model.Input.EndDateTime,
+            IsRequired = true,
+            RequiredErrorMessage = "End date/time is required.",
+            ValidationMessage = ViewData.ModelState["Input.EndDateTime"]?.Errors.FirstOrDefault()?.ErrorMessage
+        })
     </div>
 
     <div>

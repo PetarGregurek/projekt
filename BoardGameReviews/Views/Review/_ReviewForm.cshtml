@@ -16,9 +16,15 @@
     </div>
 
     <div>
-        <label asp-for="Input.CreatedAt" class="form-label"></label>
-        <input asp-for="Input.CreatedAt" class="form-control" type="datetime-local" />
-        <span asp-validation-for="Input.CreatedAt" class="text-danger"></span>
+        @await Html.PartialAsync("_DateTimePicker", new BoardGameReviews.Models.DateTimePickerViewModel
+        {
+            FieldName = "Input.CreatedAt",
+            FieldId = "Input_CreatedAt",
+            Label = "Created At",
+            Value = Model.Input.CreatedAt,
+            IsRequired = false,
+            ValidationMessage = ViewData.ModelState["Input.CreatedAt"]?.Errors.FirstOrDefault()?.ErrorMessage
+        })
     </div>
 
     <div class="d-flex align-items-center gap-2 mt-4">

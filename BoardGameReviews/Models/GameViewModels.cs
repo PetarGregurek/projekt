@@ -354,11 +354,11 @@ namespace BoardGameReviews.Models
 
         [Required(ErrorMessage = "Start date/time is required.")]
         [Display(Name = "Start Date/Time")]
-        public DateTime StartDateTime { get; set; } = DateTime.Now;
+        public DateTime? StartDateTime { get; set; }
 
         [Required(ErrorMessage = "End date/time is required.")]
         [Display(Name = "End Date/Time")]
-        public DateTime EndDateTime { get; set; } = DateTime.Now.AddHours(2);
+        public DateTime? EndDateTime { get; set; }
 
         [Required(ErrorMessage = "The location is required.")]
         [StringLength(200)]
@@ -408,7 +408,7 @@ namespace BoardGameReviews.Models
         public bool IsRecommended { get; set; }
 
         [Display(Name = "Created At")]
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime? CreatedAt { get; set; }
 
         [Range(1, int.MaxValue, ErrorMessage = "Select a game.")]
         [Display(Name = "Game")]
