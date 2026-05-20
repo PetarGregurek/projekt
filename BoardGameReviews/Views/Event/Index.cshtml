@@ -1,0 +1,48 @@
+@model List<BoardGameReviews.Models.EventListItemViewModel>
+
+@{
+    ViewData["Title"] = "Events";
+}
+
+<section class="game-page game-list-page">
+    <div class="game-hero mb-4 d-flex justify-content-between align-items-start gap-3 flex-wrap">
+        <div>
+            <p class="eyebrow mb-2">Entity Index</p>
+            <h1 class="mb-0">Events</h1>
+        </div>
+        <a asp-controller="Game" asp-action="Index" class="btn game-btn-outline">Games</a>
+    </div>
+
+    <div class="entity-block game-table-wrap">
+        <div class="entity-header">Event list (@Model.Count)</div>
+        <div class="table-responsive">
+            <table class="table game-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Game</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Location</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var eventItem in Model)
+                    {
+                        <tr>
+                            <td>@eventItem.Event.Name</td>
+                            <td>@eventItem.GameName</td>
+                            <td>@eventItem.Event.StartDateTime.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>@eventItem.Event.EndDateTime.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>@eventItem.Event.Location</td>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@eventItem.Event.Id" class="btn btn-sm game-btn-primary">Details</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

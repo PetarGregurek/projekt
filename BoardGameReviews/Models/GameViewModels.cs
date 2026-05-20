@@ -3,12 +3,6 @@ namespace BoardGameReviews.Models
     public class GameIndexViewModel
     {
         public List<GameListItemViewModel> Games { get; set; } = new();
-        public List<Category> Categories { get; set; } = new();
-        public List<GameType> GameTypes { get; set; } = new();
-        public List<Publisher> Publishers { get; set; } = new();
-        public List<User> Users { get; set; } = new();
-        public List<ReviewListItemViewModel> Reviews { get; set; } = new();
-        public List<EventListItemViewModel> Events { get; set; } = new();
     }
 
     public class GameListItemViewModel
@@ -52,30 +46,40 @@ namespace BoardGameReviews.Models
         public double? AverageRating { get; set; }
     }
 
-    public class EntityDetailsViewModel
+    public class CategoryDetailsViewModel
     {
-        public string EntityType { get; set; } = "game";
-        public int EntityId { get; set; }
+        public required Category Category { get; set; }
+        public List<Game> Games { get; set; } = new();
+    }
 
-        public GameDetailsViewModel? GameDetails { get; set; }
+    public class GameTypeDetailsViewModel
+    {
+        public required GameType GameType { get; set; }
+        public List<Game> Games { get; set; } = new();
+    }
 
-        public Category? Category { get; set; }
-        public List<Game> CategoryGames { get; set; } = new();
+    public class PublisherDetailsViewModel
+    {
+        public required Publisher Publisher { get; set; }
+        public List<Game> Games { get; set; } = new();
+    }
 
-        public GameType? GameType { get; set; }
-        public List<Game> GameTypeGames { get; set; } = new();
+    public class UserDetailsViewModel
+    {
+        public required User User { get; set; }
+        public List<ReviewListItemViewModel> Reviews { get; set; } = new();
+    }
 
-        public Publisher? Publisher { get; set; }
-        public List<Game> PublisherGames { get; set; } = new();
-
+    public class ReviewDetailsViewModel
+    {
+        public required Review Review { get; set; }
+        public Game? Game { get; set; }
         public User? User { get; set; }
-        public List<ReviewListItemViewModel> UserReviews { get; set; } = new();
+    }
 
-        public Review? Review { get; set; }
-        public Game? ReviewGame { get; set; }
-        public User? ReviewUser { get; set; }
-
-        public Event? Event { get; set; }
-        public Game? EventGame { get; set; }
+    public class EventDetailsViewModel
+    {
+        public required Event Event { get; set; }
+        public Game? Game { get; set; }
     }
 }

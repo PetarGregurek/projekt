@@ -1,0 +1,25 @@
+@model BoardGameReviews.Models.EventDetailsViewModel
+
+@{
+    ViewData["Title"] = "Event Details";
+}
+
+<section class="game-page game-details-page">
+    <div class="game-hero mb-4 d-flex justify-content-between align-items-start gap-3 flex-wrap">
+        <div>
+            <p class="eyebrow mb-2">Entity Details</p>
+            <h1 class="mb-0">@Model.Event.Name</h1>
+        </div>
+        <a asp-action="Index" class="btn game-btn-outline">Back to Events</a>
+    </div>
+
+    <div class="card game-card">
+        <div class="card-header">Event</div>
+        <div class="card-body">
+            <p><strong>Game:</strong> @Model.Game?.Name</p>
+            <p><strong>Start:</strong> @Model.Event.StartDateTime.ToString("dd.MM.yyyy HH:mm")</p>
+            <p><strong>End:</strong> @Model.Event.EndDateTime.ToString("dd.MM.yyyy HH:mm")</p>
+            <p class="mb-0"><strong>Location:</strong> @Model.Event.Location</p>
+        </div>
+    </div>
+</section>

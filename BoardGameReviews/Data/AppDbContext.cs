@@ -11,7 +11,6 @@ namespace BoardGameReviews.Data
         public DbSet<GameType> GameTypes { get; set; }
         public DbSet<Publisher> Publishers { get; set; }
         public DbSet<Game> Games { get; set; }
-        public DbSet<Tag> Tags { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Event> Events { get; set; }

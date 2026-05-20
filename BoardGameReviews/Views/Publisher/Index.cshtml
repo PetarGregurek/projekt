@@ -1,0 +1,42 @@
+@model List<BoardGameReviews.Models.Publisher>
+
+@{
+    ViewData["Title"] = "Publishers";
+}
+
+<section class="game-page game-list-page">
+    <div class="game-hero mb-4 d-flex justify-content-between align-items-start gap-3 flex-wrap">
+        <div>
+            <p class="eyebrow mb-2">Entity Index</p>
+            <h1 class="mb-0">Publishers</h1>
+        </div>
+        <a asp-controller="Game" asp-action="Index" class="btn game-btn-outline">Games</a>
+    </div>
+
+    <div class="entity-block game-table-wrap">
+        <div class="entity-header">Publisher list (@Model.Count)</div>
+        <div class="table-responsive">
+            <table class="table game-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Country</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var publisher in Model)
+                    {
+                        <tr>
+                            <td>@publisher.Name</td>
+                            <td>@publisher.Country</td>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@publisher.Id" class="btn btn-sm game-btn-primary">Details</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

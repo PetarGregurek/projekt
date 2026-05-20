@@ -38,32 +38,67 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "game-details",
     pattern: "games/{id:int}",
-    defaults: new { controller = "Game", action = "Details", entity = "game" });
+    defaults: new { controller = "Game", action = "Details" });
+
+app.MapControllerRoute(
+    name: "categories-list",
+    pattern: "categories",
+    defaults: new { controller = "Category", action = "Index" });
 
 app.MapControllerRoute(
     name: "category-details",
     pattern: "categories/{id:int}",
-    defaults: new { controller = "Game", action = "Details", entity = "category" });
+    defaults: new { controller = "Category", action = "Details" });
+
+app.MapControllerRoute(
+    name: "game-types-list",
+    pattern: "game-types",
+    defaults: new { controller = "GameType", action = "Index" });
+
+app.MapControllerRoute(
+    name: "game-type-details",
+    pattern: "game-types/{id:int}",
+    defaults: new { controller = "GameType", action = "Details" });
+
+app.MapControllerRoute(
+    name: "publishers-list",
+    pattern: "publishers",
+    defaults: new { controller = "Publisher", action = "Index" });
 
 app.MapControllerRoute(
     name: "publisher-details",
     pattern: "publishers/{id:int}",
-    defaults: new { controller = "Game", action = "Details", entity = "publisher" });
+    defaults: new { controller = "Publisher", action = "Details" });
+
+app.MapControllerRoute(
+    name: "users-list",
+    pattern: "users",
+    defaults: new { controller = "User", action = "Index" });
 
 app.MapControllerRoute(
     name: "user-details",
     pattern: "users/{id:int}",
-    defaults: new { controller = "Game", action = "Details", entity = "user" });
+    defaults: new { controller = "User", action = "Details" });
+
+app.MapControllerRoute(
+    name: "events-list",
+    pattern: "events",
+    defaults: new { controller = "Event", action = "Index" });
 
 app.MapControllerRoute(
     name: "event-details",
     pattern: "events/{id:int}",
-    defaults: new { controller = "Game", action = "Details", entity = "event" });
+    defaults: new { controller = "Event", action = "Details" });
+
+app.MapControllerRoute(
+    name: "reviews-list",
+    pattern: "reviews",
+    defaults: new { controller = "Review", action = "Index" });
 
 app.MapControllerRoute(
     name: "review-details",
     pattern: "reviews/{id:int}",
-    defaults: new { controller = "Game", action = "Details", entity = "review" });
+    defaults: new { controller = "Review", action = "Details" });
 
 app.MapControllerRoute(
     name: "privacy-page",

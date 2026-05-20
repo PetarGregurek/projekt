@@ -1,0 +1,47 @@
+@model BoardGameReviews.Models.CategoryDetailsViewModel
+
+@{
+    ViewData["Title"] = "Category Details";
+}
+
+<section class="game-page game-details-page">
+    <div class="game-hero mb-4 d-flex justify-content-between align-items-start gap-3 flex-wrap">
+        <div>
+            <p class="eyebrow mb-2">Entity Details</p>
+            <h1 class="mb-0">@Model.Category.Name</h1>
+        </div>
+        <a asp-action="Index" class="btn game-btn-outline">Back to Categories</a>
+    </div>
+
+    <div class="card game-card mb-4">
+        <div class="card-header">Category</div>
+        <div class="card-body">
+            <p><strong>Description:</strong> @Model.Category.Description</p>
+            <p><strong>Age Group:</strong> @Model.Category.AgeGroup</p>
+            <p><strong>Difficulty:</strong> @Model.Category.Difficulty</p>
+            <p class="mb-0"><strong>Popularity:</strong> @Model.Category.Popularity</p>
+        </div>
+    </div>
+
+    <div class="card game-card">
+        <div class="card-header">Games in Category</div>
+        <div class="card-body">
+            @if (Model.Games.Count == 0)
+            {
+                <p class="mb-0">No games found for this category.</p>
+            }
+            else
+            {
+                <ul class="list-group game-event-list">
+                    @foreach (var game in Model.Games)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <span>@game.Name (@game.YearPublished)</span>
+                            <a asp-controller="Game" asp-action="Details" asp-route-id="@game.Id" class="btn btn-sm game-btn-outline">Open Game</a>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+</section>

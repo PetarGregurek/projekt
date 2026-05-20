@@ -15,13 +15,7 @@ namespace BoardGameReviews.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var games      = await _repo.GetAllGamesAsync();
-            var categories = await _repo.GetAllCategoriesAsync();
-            var gameTypes  = await _repo.GetAllGameTypesAsync();
-            var publishers = await _repo.GetAllPublishersAsync();
-            var users      = await _repo.GetAllUsersAsync();
-            var reviews    = await _repo.GetAllReviewsAsync();
-            var events     = await _repo.GetAllEventsAsync();
+            var games = await _repo.GetAllGamesAsync();
 
             var model = new GameIndexViewModel
             {
@@ -36,111 +30,18 @@ namespace BoardGameReviews.Controllers
                         AverageRating = g.Reviews.Count > 0 ? g.Reviews.Average(r => r.Rating) : null,
                         EventCount    = g.Events.Count
                     })
-                    .ToList(),
-                Categories = categories,
-                GameTypes  = gameTypes,
-                Publishers = publishers,
-                Users      = users,
-                Reviews    = reviews
-                    .Select(r => new ReviewListItemViewModel
-                    {
-                        Review   = r,
-                        GameName = r.Game?.Name,
-                        Username = r.User?.Username
-                    })
-                    .ToList(),
-                Events = events
-                    .Select(e => new EventListItemViewModel
-                    {
-                        Event    = e,
-                        GameName = e.Game?.Name
-                    })
                     .ToList()
             };
 
             return View(model);
         }
 
-        public async Task<IActionResult> Details(int id, string entity = "game")
+        public async Task<IActionResult> Details(int id)
         {
-            var normalizedEntity = (entity ?? "game").Trim().ToLowerInvariant();
-            var model = new EntityDetailsViewModel
-            {
-                EntityType = normalizedEntity,
-                EntityId   = id
-            };
+            var game = await _repo.GetGameWithDetailsAsync(id);
+            if (game == null) return NotFound();
 
-            switch (normalizedEntity)
-            {
-                case "game":
-                {
-                    var game = await _repo.GetGameWithDetailsAsync(id);
-                    if (game == null) return NotFound();
-                    model.GameDetails = BuildGameDetails(game);
-                    break;
-                }
-                case "category":
-                {
-                    var category = await _repo.GetCategoryWithGamesAsync(id);
-                    if (category == null) return NotFound();
-                    model.Category      = category;
-                    model.CategoryGames = category.Games.OrderBy(g => g.Name).ToList();
-                    break;
-                }
-                case "gametype":
-                {
-                    var gameType = await _repo.GetGameTypeWithGamesAsync(id);
-                    if (gameType == null) return NotFound();
-                    model.GameType      = gameType;
-                    model.GameTypeGames = gameType.Games.OrderBy(g => g.Name).ToList();
-                    break;
-                }
-                case "publisher":
-                {
-                    var publisher = await _repo.GetPublisherWithGamesAsync(id);
-                    if (publisher == null) return NotFound();
-                    model.Publisher      = publisher;
-                    model.PublisherGames = publisher.Games.OrderBy(g => g.Name).ToList();
-                    break;
-                }
-                case "user":
-                {
-                    var user = await _repo.GetUserWithReviewsAsync(id);
-                    if (user == null) return NotFound();
-                    model.User        = user;
-                    model.UserReviews = user.Reviews
-                        .OrderByDescending(r => r.CreatedAt)
-                        .Select(r => new ReviewListItemViewModel
-                        {
-                            Review   = r,
-                            GameName = r.Game?.Name,
-                            Username = user.Username
-                        })
-                        .ToList();
-                    break;
-                }
-                case "review":
-                {
-                    var review = await _repo.GetReviewWithDetailsAsync(id);
-                    if (review == null) return NotFound();
-                    model.Review     = review;
-                    model.ReviewGame = review.Game;
-                    model.ReviewUser = review.User;
-                    break;
-                }
-                case "event":
-                {
-                    var evt = await _repo.GetEventWithGameAsync(id);
-                    if (evt == null) return NotFound();
-                    model.Event     = evt;
-                    model.EventGame = evt.Game;
-                    break;
-                }
-                default:
-                    return NotFound();
-            }
-
-            return View(model);
+            return View(BuildGameDetails(game));
         }
 
         private static GameDetailsViewModel BuildGameDetails(Game game)
