@@ -365,9 +365,10 @@ const wireDateTimePickers = () => {
 	const requiredDateMessage = isHr ? 'Odaberite datum i vrijeme.' : 'Select date and time.';
 	const partialMessage = isHr ? 'Odaberite i datum i vrijeme.' : 'Select both date and time.';
 	const invalidMessage = isHr ? 'Neispravna vrijednost datuma i vremena.' : 'Invalid date/time value.';
-	const todayLabel = isHr ? 'Danas' : 'Today';
-	const clearLabel = isHr ? 'Obriši' : 'Clear';
-	const doneLabel = isHr ? 'Gotovo' : 'Done';
+	const invalidMinuteMessage = isHr ? 'Minute moraju biti između 00 i 59.' : 'Minutes must be between 00 and 59.';
+	const invalidHourMessage = isHr ? 'Sati moraju biti između 1 i 12.' : 'Hours must be between 1 and 12.';
+	const invalidYearMessage = isHr ? 'Godina mora biti između 1900 i 2100.' : 'Year must be between 1900 and 2100.';
+	const invalidDayMessage = isHr ? 'Dan mora biti valjan za odabrani mjesec.' : 'Day must be valid for selected month.';
 	const hoursLabel = isHr ? 'Sati' : 'Hours';
 	const minutesLabel = isHr ? 'Minute' : 'Minutes';
 	const selectDateText = isHr ? 'Odaberite datum' : 'Select date';
@@ -376,7 +377,6 @@ const wireDateTimePickers = () => {
 	const monthFormatter = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' });
 	const dayFormatter = new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit', year: 'numeric' });
 	const summaryFormatter = new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' });
-	const timeFormatter = new Intl.DateTimeFormat(locale, { timeStyle: 'short' });
 	const weekdayFormatter = new Intl.DateTimeFormat(locale, { weekday: 'short' });
 	const weekdaySeed = isHr ? [1, 2, 3, 4, 5, 6, 7] : [7, 1, 2, 3, 4, 5, 6];
 	const weekdayLabels = weekdaySeed.map((day) => weekdayFormatter.format(new Date(2024, 0, day)));
@@ -435,21 +435,31 @@ const wireDateTimePickers = () => {
 		const panel = root.querySelector('[data-dtp-panel]');
 		const validation = root.querySelector('[data-dtp-validation]');
 		const monthLabel = root.querySelector('[data-dtp-month-label]');
+		const yearMinusButton = root.querySelector('[data-dtp-year-minus]');
+		const yearPlusButton = root.querySelector('[data-dtp-year-plus]');
+		const yearInput = root.querySelector('[data-dtp-year-input]');
+		const dayMinusButton = root.querySelector('[data-dtp-day-minus]');
+		const dayPlusButton = root.querySelector('[data-dtp-day-plus]');
+		const dayInput = root.querySelector('[data-dtp-day-input]');
 		const weekdays = root.querySelector('[data-dtp-weekdays]');
 		const daysGrid = root.querySelector('[data-dtp-days]');
 		const prevButton = root.querySelector('[data-dtp-prev]');
 		const nextButton = root.querySelector('[data-dtp-next]');
 		const hourClock = root.querySelector('[data-dtp-hour-clock]');
 		const minuteClock = root.querySelector('[data-dtp-minute-clock]');
-		const hourDisplay = root.querySelector('[data-dtp-hour-display]');
-		const minuteDisplay = root.querySelector('[data-dtp-minute-display]');
+		const hourMinusButton = root.querySelector('[data-dtp-hour-minus]');
+		const hourPlusButton = root.querySelector('[data-dtp-hour-plus]');
+		const hourInput = root.querySelector('[data-dtp-hour-input]');
+		const minuteMinusButton = root.querySelector('[data-dtp-minute-minus]');
+		const minutePlusButton = root.querySelector('[data-dtp-minute-plus]');
+		const minuteInput = root.querySelector('[data-dtp-minute-input]');
 		const amButton = root.querySelector('[data-dtp-am]');
 		const pmButton = root.querySelector('[data-dtp-pm]');
 		const todayButton = root.querySelector('[data-dtp-today]');
 		const clearButton = root.querySelector('[data-dtp-clear]');
 		const closeButton = root.querySelector('[data-dtp-close]');
 
-		if (!hidden || !trigger || !summary || !panel || !validation || !monthLabel || !weekdays || !daysGrid || !prevButton || !nextButton || !hourClock || !minuteClock || !hourDisplay || !minuteDisplay || !amButton || !pmButton || !todayButton || !clearButton || !closeButton) {
+		if (!hidden || !trigger || !summary || !panel || !validation || !monthLabel || !yearMinusButton || !yearPlusButton || !yearInput || !dayMinusButton || !dayPlusButton || !dayInput || !weekdays || !daysGrid || !prevButton || !nextButton || !hourClock || !minuteClock || !hourMinusButton || !hourPlusButton || !hourInput || !minuteMinusButton || !minutePlusButton || !minuteInput || !amButton || !pmButton || !todayButton || !clearButton || !closeButton) {
 			return;
 		}
 
@@ -471,6 +481,19 @@ const wireDateTimePickers = () => {
 		const hasDate = () => state.selectedYear !== null && state.selectedMonth !== null && state.selectedDay !== null;
 		const hasTime = () => state.selectedHour !== null && state.selectedMinute !== null;
 		const hasCompleteSelection = () => hasDate() && hasTime();
+
+		const syncSelectedDayToMonth = () => {
+			if (!hasDate()) {
+				return;
+			}
+
+			const maxDay = new Date(state.selectedYear, state.selectedMonth, 0).getDate();
+			if (state.selectedDay > maxDay) {
+				state.selectedDay = maxDay;
+			}
+		};
+
+		const getMaxDayForViewMonth = () => new Date(state.viewYear, state.viewMonth + 1, 0).getDate();
 
 		const getSelectedDateTime = () => {
 			if (!hasCompleteSelection()) {
@@ -557,26 +580,6 @@ const wireDateTimePickers = () => {
 			};
 		};
 
-		const renderClock = (container, total, selectedValue, prefix, selectedClass, radius, displayLabel) => {
-			let markup = '';
-			for (let value = 0; value < total; value += 1) {
-				const angle = (value / total) * 360 - 90;
-				const isSelected = selectedValue === value;
-				const visualValue = prefix === 'hour' ? String(value === 0 ? 12 : value).padStart(2, ' ') : String(value).padStart(2, '0');
-				markup += `
-					<button type="button"
-						class="dtp-clock__item dtp-clock__item--${prefix} ${isSelected ? selectedClass : ''}"
-						style="--dtp-angle:${angle}deg; --dtp-radius:${radius};"
-						data-dtp-${prefix}="${value === 0 && prefix === 'hour' ? 12 : value}"
-						aria-label="${prefix === 'hour' ? `${value === 0 ? 12 : value} ${hoursLabel}` : `${value} ${minutesLabel}`}">
-						${prefix === 'hour' ? (value === 0 ? 12 : value) : ''}
-					</button>`;
-			}
-
-			container.innerHTML = markup;
-			displayLabel.textContent = selectedValue === null ? '--' : (prefix === 'hour' ? String(selectedValue).padStart(2, '0') : String(selectedValue).padStart(2, '0'));
-		};
-
 		const renderHours = () => {
 			let markup = '';
 			for (let hour = 1; hour <= 12; hour += 1) {
@@ -636,6 +639,10 @@ const wireDateTimePickers = () => {
 			renderMinutes();
 			renderPeriodButtons();
 			renderSummary();
+			hourInput.value = state.selectedHour === null ? '' : String(state.selectedHour).padStart(2, '0');
+			minuteInput.value = state.selectedMinute === null ? '' : String(state.selectedMinute).padStart(2, '0');
+			yearInput.value = String(state.viewYear);
+			dayInput.value = state.selectedDay === null ? '' : String(state.selectedDay).padStart(2, '0');
 		};
 
 		const openPanel = () => {
@@ -661,8 +668,25 @@ const wireDateTimePickers = () => {
 			renderAll();
 		};
 
+		const setDay = (day) => {
+			if (!Number.isFinite(day)) {
+				return;
+			}
+
+			const maxDay = getMaxDayForViewMonth();
+			const normalized = ((((Math.round(day) - 1) % maxDay) + maxDay) % maxDay) + 1;
+			state.selectedYear = state.viewYear;
+			state.selectedMonth = state.viewMonth + 1;
+			state.selectedDay = normalized;
+			renderAll();
+		};
+
 		const setHour = (hour) => {
-			state.selectedHour = hour;
+			if (!Number.isFinite(hour)) {
+				return;
+			}
+
+			state.selectedHour = ((((Math.round(hour) - 1) % 12) + 12) % 12) + 1;
 			if (state.period === null) {
 				state.period = 'AM';
 			}
@@ -670,12 +694,32 @@ const wireDateTimePickers = () => {
 		};
 
 		const setMinute = (minute) => {
-			state.selectedMinute = minute;
+			if (!Number.isFinite(minute)) {
+				return;
+			}
+
+			state.selectedMinute = ((Math.round(minute) % 60) + 60) % 60;
 			renderAll();
 		};
 
 		const setPeriod = (period) => {
 			state.period = period;
+			renderAll();
+		};
+
+		const setViewYear = (year) => {
+			if (!Number.isFinite(year)) {
+				return;
+			}
+
+			const normalized = Math.min(2100, Math.max(1900, Math.round(year)));
+			state.viewYear = normalized;
+
+			if (hasDate()) {
+				state.selectedYear = normalized;
+				syncSelectedDayToMonth();
+			}
+
 			renderAll();
 		};
 
@@ -709,6 +753,105 @@ const wireDateTimePickers = () => {
 			return true;
 		};
 
+		const applyMinuteFromInput = () => {
+			const raw = (minuteInput.value || '').trim();
+			if (raw.length === 0) {
+				state.selectedMinute = null;
+				renderAll();
+				return;
+			}
+
+			if (!/^\d{1,2}$/.test(raw)) {
+				setValidationState(invalidMinuteMessage, 'invalid');
+				return;
+			}
+
+			const value = Number(raw);
+			if (!Number.isFinite(value) || value < 0 || value > 59) {
+				setValidationState(invalidMinuteMessage, 'invalid');
+				return;
+			}
+
+			setMinute(value);
+			if (state.selectedHour !== null || hasDate()) {
+				setValidationState('', 'valid');
+			}
+		};
+
+		const applyHourFromInput = () => {
+			const raw = (hourInput.value || '').trim();
+			if (raw.length === 0) {
+				state.selectedHour = null;
+				renderAll();
+				return;
+			}
+
+			if (!/^\d{1,2}$/.test(raw)) {
+				setValidationState(invalidHourMessage, 'invalid');
+				return;
+			}
+
+			const value = Number(raw);
+			if (!Number.isFinite(value) || value < 1 || value > 12) {
+				setValidationState(invalidHourMessage, 'invalid');
+				return;
+			}
+
+			setHour(value);
+			if (state.selectedMinute !== null || hasDate()) {
+				setValidationState('', 'valid');
+			}
+		};
+
+		const applyYearFromInput = () => {
+			const raw = (yearInput.value || '').trim();
+			if (raw.length === 0) {
+				renderAll();
+				return;
+			}
+
+			if (!/^\d{4}$/.test(raw)) {
+				setValidationState(invalidYearMessage, 'invalid');
+				return;
+			}
+
+			const value = Number(raw);
+			if (!Number.isFinite(value) || value < 1900 || value > 2100) {
+				setValidationState(invalidYearMessage, 'invalid');
+				return;
+			}
+
+			setViewYear(value);
+			setValidationState('', 'valid');
+		};
+
+		const applyDayFromInput = () => {
+			const raw = (dayInput.value || '').trim();
+			if (raw.length === 0) {
+				state.selectedDay = null;
+				renderAll();
+				return;
+			}
+
+			if (!/^\d{1,2}$/.test(raw)) {
+				setValidationState(invalidDayMessage, 'invalid');
+				return;
+			}
+
+			const value = Number(raw);
+			const maxDay = getMaxDayForViewMonth();
+			if (!Number.isFinite(value) || value < 1 || value > maxDay) {
+				setValidationState(invalidDayMessage, 'invalid');
+				return;
+			}
+
+			state.selectedYear = state.viewYear;
+			state.selectedMonth = state.viewMonth + 1;
+			state.selectedDay = value;
+			renderAll();
+			setValidationState('', 'valid');
+		};
+
 		const existingISO = parseISO(hidden.value);
 		if (existingISO) {
 			state.selectedYear = existingISO.getFullYear();
@@ -721,13 +864,9 @@ const wireDateTimePickers = () => {
 			state.viewMonth = existingISO.getMonth();
 		}
 
-		renderAll();
-
 		trigger.addEventListener('click', () => {
 			if (panel.hidden) {
 				openPanel();
-			} else {
-				closePanel(true);
 			}
 		});
 
@@ -768,14 +907,43 @@ const wireDateTimePickers = () => {
 			const result = clampMonth(state.viewYear, state.viewMonth - 1);
 			state.viewYear = result.year;
 			state.viewMonth = result.month;
-			renderCalendar();
+			renderAll();
 		});
 
 		nextButton.addEventListener('click', () => {
 			const result = clampMonth(state.viewYear, state.viewMonth + 1);
 			state.viewYear = result.year;
 			state.viewMonth = result.month;
-			renderCalendar();
+			renderAll();
+		});
+
+		yearMinusButton.addEventListener('click', () => setViewYear(state.viewYear - 1));
+		yearPlusButton.addEventListener('click', () => setViewYear(state.viewYear + 1));
+		yearInput.addEventListener('input', () => {
+			yearInput.value = yearInput.value.replace(/\D+/g, '').slice(0, 4);
+		});
+		yearInput.addEventListener('blur', applyYearFromInput);
+		yearInput.addEventListener('keydown', (event) => {
+			if (event.key === 'Enter') {
+				event.preventDefault();
+				applyYearFromInput();
+			}
+		});
+
+		dayMinusButton.addEventListener('click', () => setDay((state.selectedDay ?? 1) - 1));
+		dayPlusButton.addEventListener('click', () => setDay((state.selectedDay ?? 1) + 1));
+		dayInput.addEventListener('input', () => {
+			dayInput.value = dayInput.value.replace(/\D+/g, '').slice(0, 2);
+		});
+		dayInput.addEventListener('blur', () => {
+			applyDayFromInput();
+			validate();
+		});
+		dayInput.addEventListener('keydown', (event) => {
+			if (event.key === 'Enter') {
+				event.preventDefault();
+				applyDayFromInput();
+			}
 		});
 
 		amButton.addEventListener('click', () => setPeriod('AM'));
@@ -806,17 +974,39 @@ const wireDateTimePickers = () => {
 			setValidationState('', 'valid');
 		});
 
-		closeButton.addEventListener('click', () => closePanel(true));
-
-		document.addEventListener('click', (event) => {
-			if (root.contains(event.target)) {
-				return;
-			}
-
-			if (!panel.hidden) {
-				closePanel(false);
+		hourMinusButton.addEventListener('click', () => setHour((state.selectedHour ?? 1) - 1));
+		hourPlusButton.addEventListener('click', () => setHour((state.selectedHour ?? 12) + 1));
+		hourInput.addEventListener('input', () => {
+			hourInput.value = hourInput.value.replace(/\D+/g, '').slice(0, 2);
+		});
+		hourInput.addEventListener('blur', () => {
+			applyHourFromInput();
+			validate();
+		});
+		hourInput.addEventListener('keydown', (event) => {
+			if (event.key === 'Enter') {
+				event.preventDefault();
+				applyHourFromInput();
 			}
 		});
+
+		minuteMinusButton.addEventListener('click', () => setMinute((state.selectedMinute ?? 0) - 1));
+		minutePlusButton.addEventListener('click', () => setMinute((state.selectedMinute ?? 0) + 1));
+		minuteInput.addEventListener('input', () => {
+			minuteInput.value = minuteInput.value.replace(/\D+/g, '').slice(0, 2);
+		});
+		minuteInput.addEventListener('blur', () => {
+			applyMinuteFromInput();
+			validate();
+		});
+		minuteInput.addEventListener('keydown', (event) => {
+			if (event.key === 'Enter') {
+				event.preventDefault();
+				applyMinuteFromInput();
+			}
+		});
+
+		closeButton.addEventListener('click', () => closePanel(true));
 
 		const form = root.closest('form');
 		if (form) {
@@ -826,6 +1016,8 @@ const wireDateTimePickers = () => {
 
 			form._dtpValidators.push(validate);
 		}
+
+		renderAll();
 	});
 };
 

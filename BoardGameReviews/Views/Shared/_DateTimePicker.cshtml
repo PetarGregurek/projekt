@@ -39,6 +39,28 @@
                                    <div class="dtp-section__title" data-dtp-month-label></div>
                                    <button type="button" class="dtp-nav-btn" data-dtp-next aria-label="Next month">›</button>
                             </div>
+                            <div class="dtp-year-fine" role="group" aria-label="Year controls">
+                                   <button type="button" class="dtp-year-fine__btn" data-dtp-year-minus aria-label="Year minus one">-</button>
+                                   <input type="text"
+                                          class="dtp-year-fine__input"
+                                          inputmode="numeric"
+                                          maxlength="4"
+                                          placeholder="2026"
+                                          data-dtp-year-input
+                                          aria-label="Year value" />
+                                   <button type="button" class="dtp-year-fine__btn" data-dtp-year-plus aria-label="Year plus one">+</button>
+                            </div>
+                            <div class="dtp-day-fine" role="group" aria-label="Day controls">
+                                   <button type="button" class="dtp-day-fine__btn" data-dtp-day-minus aria-label="Day minus one">-</button>
+                                   <input type="text"
+                                          class="dtp-day-fine__input"
+                                          inputmode="numeric"
+                                          maxlength="2"
+                                          placeholder="01"
+                                          data-dtp-day-input
+                                          aria-label="Day value" />
+                                   <button type="button" class="dtp-day-fine__btn" data-dtp-day-plus aria-label="Day plus one">+</button>
+                            </div>
                             <div class="dtp-weekdays" data-dtp-weekdays></div>
                             <div class="dtp-day-grid" data-dtp-days></div>
                      </section>
@@ -58,12 +80,34 @@
                                           <div class="dtp-clock" data-dtp-hour-clock>
                                                  <div class="dtp-clock__center" data-dtp-hour-display>--</div>
                                           </div>
+                                          <div class="dtp-hour-fine" role="group" aria-label="Hour controls">
+                                                 <button type="button" class="dtp-hour-fine__btn" data-dtp-hour-minus aria-label="Hour minus one">-</button>
+                                                 <input type="text"
+                                                        class="dtp-hour-fine__input"
+                                                        inputmode="numeric"
+                                                        maxlength="2"
+                                                        placeholder="12"
+                                                        data-dtp-hour-input
+                                                        aria-label="Hour value" />
+                                                 <button type="button" class="dtp-hour-fine__btn" data-dtp-hour-plus aria-label="Hour plus one">+</button>
+                                          </div>
                                    </div>
 
                                    <div class="dtp-clock-card">
                                           <div class="dtp-clock-card__title">Minutes</div>
                                           <div class="dtp-clock dtp-clock--minutes" data-dtp-minute-clock>
                                                  <div class="dtp-clock__center" data-dtp-minute-display>--</div>
+                                          </div>
+                                          <div class="dtp-minute-fine" role="group" aria-label="Minute controls">
+                                                 <button type="button" class="dtp-minute-fine__btn" data-dtp-minute-minus aria-label="Minute minus one">-</button>
+                                                 <input type="text"
+                                                        class="dtp-minute-fine__input"
+                                                        inputmode="numeric"
+                                                        maxlength="2"
+                                                        placeholder="00"
+                                                        data-dtp-minute-input
+                                                        aria-label="Minute value" />
+                                                 <button type="button" class="dtp-minute-fine__btn" data-dtp-minute-plus aria-label="Minute plus one">+</button>
                                           </div>
                                    </div>
                             </div>
