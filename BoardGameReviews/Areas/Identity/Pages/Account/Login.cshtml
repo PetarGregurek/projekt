@@ -23,6 +23,13 @@
     <div class="game-card">
         <div class="card-header">Sign In</div>
         <div class="card-body">
+            @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+            {
+                <div class="auth-status mb-3" style="border-color:#e8a0a0;background:#fdf0f0;color:#7a1c1c;" role="alert">
+                    @Model.ErrorMessage
+                </div>
+            }
+
             <form id="account" method="post">
                 <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
 

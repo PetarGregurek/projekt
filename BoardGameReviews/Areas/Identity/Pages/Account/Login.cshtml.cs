@@ -32,6 +32,9 @@ namespace BoardGameReviews.Areas.Identity.Pages.Account
 
         public IList<AuthenticationScheme> ExternalLogins { get; set; } = new List<AuthenticationScheme>();
 
+        [TempData]
+        public string? ErrorMessage { get; set; }
+
         public class InputModel
         {
             [Required]
@@ -46,8 +49,18 @@ namespace BoardGameReviews.Areas.Identity.Pages.Account
             public bool RememberMe { get; set; }
         }
 
-        public async Task OnGetAsync(string? returnUrl = null)
+        public async Task OnGetAsync(string? returnUrl = null, string? oauthError = null)
         {
+            if (!string.IsNullOrWhiteSpace(oauthError))
+            {
+                ErrorMessage = oauthError;
+            }
+
+            if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                ModelState.AddModelError(string.Empty, ErrorMessage);
+            }
+
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();

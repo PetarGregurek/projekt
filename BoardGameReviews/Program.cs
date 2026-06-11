@@ -1,5 +1,6 @@
 using BoardGameReviews.Data;
 using BoardGameReviews.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -38,12 +39,38 @@ if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(goo
         .AddAuthentication()
         .AddGoogle(options =>
         {
+            options.SignInScheme = IdentityConstants.ExternalScheme;
+            options.CallbackPath = "/signin-google";
             options.ClientId = googleClientId;
             options.ClientSecret = googleClientSecret;
             options.Scope.Add("email");
             options.Scope.Add("profile");
+            options.SaveTokens = true;
+            options.CorrelationCookie.SameSite = SameSiteMode.Lax;
+            options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
+            options.CorrelationCookie.HttpOnly = true;
+            options.CorrelationCookie.IsEssential = true;
+            options.Events.OnRemoteFailure = context =>
+            {
+                context.HandleResponse();
+                var message = Uri.EscapeDataString(context.Failure?.Message ?? "External authentication failed.");
+                context.Response.Redirect($"/Identity/Account/Login?oauthError={message}");
+                return Task.CompletedTask;
+            };
         });
 }
+
+builder.Services.ConfigureExternalCookie(options =>
+{
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+});
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+});
 
 builder.Services.AddScoped<IBoardGameRepository, EfBoardGameRepository>();
 
