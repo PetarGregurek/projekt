@@ -136,6 +136,7 @@ namespace BoardGameReviews.Data
                .Include(g => g.Category)
                .Include(g => g.Reviews).ThenInclude(r => r.User)
                .Include(g => g.Events)
+               .Include(g => g.Files)
                .FirstOrDefaultAsync(g => g.Id == id);
 
         public Task<Game?> GetGameForEditAsync(int id) =>

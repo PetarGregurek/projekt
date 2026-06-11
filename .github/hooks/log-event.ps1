@@ -116,7 +116,7 @@ if ([string]::IsNullOrWhiteSpace($eventName)) {
 $timeStamp = (Get-Date).ToString('yyyy-MM-dd HH:mm:ss')
 
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-$logPath = Join-Path $repoRoot 'lab-4\agent_log.txt'
+$logPath = Join-Path $repoRoot 'lab-5\agent_log.txt'
 $logDir = Split-Path -Parent $logPath
 $stateDir = Join-Path $repoRoot '.github\hooks\.state'
 $uiRequiredFlag = Join-Path $stateDir 'ui-required.flag'

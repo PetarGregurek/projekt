@@ -23,8 +23,106 @@
             </form>
         </div>
     </div>
+
+    <div class="game-card mt-4">
+        <div class="card-header">Game Files</div>
+        <div class="card-body">
+            <form id="game-file-dropzone" class="dropzone border rounded p-3" asp-action="UploadFile" asp-route-id="@Model.Input.Id" method="post" enctype="multipart/form-data">
+                <div class="dz-message">Drop files here or click to upload</div>
+            </form>
+
+            <hr />
+
+            <div id="uploaded-files-container">
+                <p class="text-muted mb-0">Loading uploaded files...</p>
+            </div>
+        </div>
+    </div>
 </section>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" />
+    <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+    <script>
+        Dropzone.autoDiscover = false;
+
+        const gameId = @Model.Input.Id;
+        const filesUrl = '@Url.Action("GetFiles", "Game")' + '?id=' + gameId;
+        const deleteBaseUrl = '@Url.Action("DeleteFile", "Game")' + '?id=' + gameId + '&fileId=';
+
+        const dropzone = new Dropzone('#game-file-dropzone', {
+            url: '@Url.Action("UploadFile", "Game", new { id = Model.Input.Id })',
+            paramName: 'file',
+            maxFilesize: 50,
+            timeout: 0,
+            init: function() {
+                this.on('success', function() {
+                    loadFiles();
+                });
+            }
+        });
+
+        async function loadFiles() {
+            const container = document.getElementById('uploaded-files-container');
+            container.innerHTML = '<p class="text-muted mb-0">Loading uploaded files...</p>';
+
+            const response = await fetch(filesUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+
+            if (!response.ok) {
+                container.innerHTML = '<p class="text-danger mb-0">Could not load files.</p>';
+                return;
+            }
+
+            const files = await response.json();
+
+            if (!files.length) {
+                container.innerHTML = '<p class="text-muted mb-0">No files uploaded yet.</p>';
+                return;
+            }
+
+            const rows = files.map(file => {
+                const sizeKb = (file.sizeBytes / 1024).toFixed(1);
+                const uploaded = new Date(file.uploadedAt).toLocaleString();
+
+                return `
+                    <tr>
+                        <td><a href="${file.relativePath}" target="_blank" rel="noopener">${file.originalFileName}</a></td>
+                        <td>${sizeKb} KB</td>
+                        <td>${uploaded}</td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-file-id="${file.id}">Delete</button>
+                        </td>
+                    </tr>`;
+            }).join('');
+
+            container.innerHTML = `
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>File</th>
+                                <th>Size</th>
+                                <th>Uploaded</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>`;
+
+            container.querySelectorAll('button[data-file-id]').forEach(button => {
+                button.addEventListener('click', async () => {
+                    const fileId = button.getAttribute('data-file-id');
+                    const deleteResponse = await fetch(deleteBaseUrl + fileId, { method: 'DELETE' });
+
+                    if (deleteResponse.ok) {
+                        loadFiles();
+                    }
+                });
+            });
+        }
+
+        loadFiles();
+    </script>
 }

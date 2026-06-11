@@ -1,0 +1,10 @@
+@{
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+@* Consume optional sections from manage subpages to avoid section mismatch errors. *@
+@RenderSection("Styles", required: false)
+
+@RenderBody()
+
+@RenderSection("Scripts", required: false)

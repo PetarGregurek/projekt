@@ -46,5 +46,6 @@ namespace BoardGameReviews.Models
 
         public virtual ICollection<Review> Reviews { get; set; } = new HashSet<Review>();
         public virtual ICollection<Event> Events { get; set; } = new HashSet<Event>();
+        public virtual ICollection<GameFile> Files { get; set; } = new HashSet<GameFile>();
     }
 }

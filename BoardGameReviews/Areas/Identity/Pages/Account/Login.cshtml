@@ -1,0 +1,77 @@
+@page
+@model LoginModel
+@{
+    ViewData["Title"] = "Log in";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />
+}
+
+<section class="game-page game-form-page home-stage auth-stage">
+    <div class="game-hero mb-4 d-flex justify-content-between align-items-start gap-3 flex-wrap">
+        <div>
+            <a class="auth-brand" asp-controller="Home" asp-action="Index">BoardGameReviews</a>
+            <p class="eyebrow mb-2">Account</p>
+            <h1 class="mb-0">Log In</h1>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a asp-controller="Home" asp-action="Index" class="btn home-btn-sub">Back to Home</a>
+        </div>
+    </div>
+
+    <div class="game-card">
+        <div class="card-header">Sign In</div>
+        <div class="card-body">
+            <form id="account" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Login" class="form-label"></label>
+                    <input asp-for="Input.Login" class="form-control" autocomplete="username" />
+                    <span asp-validation-for="Input.Login" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Password" class="form-label"></label>
+                    <input asp-for="Input.Password" class="form-control" autocomplete="current-password" />
+                    <span asp-validation-for="Input.Password" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3 form-check">
+                    <input class="form-check-input" asp-for="Input.RememberMe" />
+                    <label asp-for="Input.RememberMe" class="form-check-label"></label>
+                </div>
+
+                <button id="login-submit" type="submit" class="btn home-btn-main">Log in</button>
+            </form>
+
+            @if (Model.ExternalLogins.Count > 0)
+            {
+                <div class="mt-3 d-flex flex-wrap gap-2">
+                    @foreach (var provider in Model.ExternalLogins)
+                    {
+                        <form asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                            <button type="submit"
+                                    class="btn home-btn-sub"
+                                    name="provider"
+                                    value="@provider.Name"
+                                    title="Log in using your @provider.DisplayName account">
+                                Login with @provider.DisplayName
+                            </button>
+                        </form>
+                    }
+                </div>
+            }
+
+            <div class="mt-3 auth-switch">
+                <span class="auth-switch-text">You don&#39;t have an account?</span>
+                <a asp-area="Identity" asp-page="/Account/Register" class="btn home-btn-sub">Register</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

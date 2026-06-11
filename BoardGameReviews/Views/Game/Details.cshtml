@@ -82,6 +82,44 @@
         </div>
     </div>
 
+    <div class="card game-card mb-4">
+        <div class="card-header">Uploaded Files</div>
+        <div class="card-body">
+            @if (Model.Files.Count == 0)
+            {
+                <p class="mb-0">There are no uploaded files for this game.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table game-table game-files-table align-middle mb-0">
+                        <colgroup>
+                            <col style="width: 72%;" />
+                            <col style="width: 28%;" />
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th class="text-start">File</th>
+                                <th class="text-start">Uploaded</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var file in Model.Files)
+                            {
+                                <tr>
+                                    <td class="text-start">
+                                        <a href="@file.RelativePath" target="_blank" rel="noopener">@file.OriginalFileName</a>
+                                    </td>
+                                    <td class="text-start text-nowrap">@file.UploadedAt.ToLocalTime().ToString("g")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
     <div class="card game-card">
         <div class="card-header">Events</div>
         <div class="card-body">
@@ -105,3 +143,11 @@
         </div>
     </div>
 </section>
+
+<style>
+    .game-files-table thead th:nth-child(2),
+    .game-files-table tbody td:nth-child(2),
+    .game-files-table tbody td:last-child {
+        text-align: left !important;
+    }
+</style>

@@ -126,6 +126,7 @@ namespace BoardGameReviews.Models
         public Category? Category { get; set; }
         public List<ReviewWithUserViewModel> Reviews { get; set; } = new();
         public List<Event> Events { get; set; } = new();
+        public List<GameFile> Files { get; set; } = new();
         public double? AverageRating { get; set; }
     }
 

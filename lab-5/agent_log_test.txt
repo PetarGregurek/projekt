@@ -1,0 +1,2 @@
+[2026-06-10 14:00:00] TEST: Pocetak logiranja u lab-5 | session_id=test-session
+[2026-06-10 14:00:01] AGENT: Konfiguracija uspjesna - agent logger je preusmjeren na lab-5/agent_log.txt

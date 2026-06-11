@@ -106,3 +106,43 @@ projekt/
 ├── .env                    # SA lozinka (nije u gitu)
 └── projekt.sln
 ```
+
+Test podaci za prijavu
+
+Admin:
+
+Email: admin@boardgamereviews.local
+Username: admin
+Password: Admin123!
+User:
+
+Email: user@boardgamereviews.local
+Username: user
+Password: User123!
+
+## Google OAuth (3rd party login)
+
+Google login je podrzan preko ASP.NET Core Identity external login toka.
+
+Preduvjeti:
+
+1. Pokreni aplikaciju preko HTTPS profila (`https://localhost:7103`).
+2. U Google Cloud Console kreiraj OAuth Client (`Web application`).
+3. Dodaj redirect URI: `https://localhost:7103/signin-google`.
+4. Preuzmi `ClientId` i `ClientSecret`.
+
+Spremanje tajni u developmentu (bez hardkodiranja):
+
+```powershell
+cd BoardGameReviews
+dotnet user-secrets init
+dotnet user-secrets set "Authentication:Google:ClientId" "<GOOGLE_CLIENT_ID>"
+dotnet user-secrets set "Authentication:Google:ClientSecret" "<GOOGLE_CLIENT_SECRET>"
+```
+
+Nakon toga na Login stranici pojavljuje se gumb `Login with Google`.
+
+Sigurnosna napomena:
+
+- Ne spremati `ClientSecret` u `appsettings.json` ili u Git repozitorij.
+- U produkciji koristiti tajne iz sigurnog secret storea / environment varijabli.

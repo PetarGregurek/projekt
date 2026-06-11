@@ -76,6 +76,21 @@ a {
   flex-wrap: wrap;
 }
 
+.site-nav-links-auth {
+  margin-left: auto;
+}
+
+.site-nav-form {
+  margin: 0;
+  padding: 0;
+}
+
+.site-nav-button {
+  font: inherit;
+  line-height: inherit;
+  cursor: pointer;
+}
+
 .site-nav-link {
   text-decoration: none;
   display: inline-block;
@@ -112,6 +127,42 @@ a {
 
 .site-main {
   padding: 1.1rem 0 1.6rem;
+}
+
+.auth-stage .auth-brand {
+  display: inline-block;
+  margin-bottom: 0.45rem;
+  text-decoration: none;
+  color: #1d2430;
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: clamp(1.55rem, 2.2vw, 1.95rem);
+  letter-spacing: 0.2px;
+}
+
+.auth-stage .auth-brand:hover,
+.auth-stage .auth-brand:focus-visible {
+  color: #0b8d7c;
+}
+
+.auth-switch {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.auth-switch-text {
+  color: #5f7081;
+  font-weight: 600;
+}
+
+.auth-status {
+  border: 1px solid #9ad2cb;
+  background: #e9faf7;
+  color: #0f5a53;
+  border-radius: 12px;
+  padding: 0.7rem 0.85rem;
+  font-weight: 600;
 }
 
 .site-footer {

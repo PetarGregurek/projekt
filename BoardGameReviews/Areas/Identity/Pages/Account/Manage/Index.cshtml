@@ -1,0 +1,65 @@
+@page
+@model BoardGameReviews.Areas.Identity.Pages.Account.Manage.IndexModel
+@{
+    ViewData["Title"] = "Manage account";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />
+}
+
+<section class="game-page game-form-page home-stage auth-stage">
+    <div class="game-hero mb-4 d-flex justify-content-between align-items-start gap-3 flex-wrap">
+        <div>
+            <a class="auth-brand" asp-controller="Home" asp-action="Index">BoardGameReviews</a>
+            <p class="eyebrow mb-2">Account</p>
+            <h1 class="mb-0">Manage Account</h1>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a asp-controller="Home" asp-action="Index" class="btn home-btn-sub">Back to Home</a>
+        </div>
+    </div>
+
+    <div class="game-card">
+        <div class="card-header">Account Details</div>
+        <div class="card-body">
+            @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+            {
+                <div class="auth-status mb-3" role="status">@Model.StatusMessage</div>
+            }
+
+            <form id="profile-form" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <input class="form-control" value="@Model.Username" disabled />
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.PhoneNumber" class="form-label"></label>
+                    <input asp-for="Input.PhoneNumber" class="form-control" autocomplete="tel" />
+                    <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.OIB" class="form-label"></label>
+                    <input asp-for="Input.OIB" class="form-control" maxlength="11" />
+                    <span asp-validation-for="Input.OIB" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.JMBG" class="form-label"></label>
+                    <input asp-for="Input.JMBG" class="form-control" maxlength="13" />
+                    <span asp-validation-for="Input.JMBG" class="text-danger"></span>
+                </div>
+
+                <button id="update-profile-button" type="submit" class="btn home-btn-main">Save changes</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

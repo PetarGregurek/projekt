@@ -1,9 +1,10 @@
 using BoardGameReviews.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace BoardGameReviews.Data
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext<AppUser>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -11,9 +12,10 @@ namespace BoardGameReviews.Data
         public DbSet<GameType> GameTypes { get; set; }
         public DbSet<Publisher> Publishers { get; set; }
         public DbSet<Game> Games { get; set; }
-        public DbSet<User> Users { get; set; }
+        public new DbSet<User> Users { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Event> Events { get; set; }
+        public DbSet<GameFile> GameFiles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -38,6 +40,13 @@ namespace BoardGameReviews.Data
                 .HasOne(e => e.Game)
                 .WithMany(g => g.Events)
                 .HasForeignKey(e => e.GameId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // GameFile -> Game (many files per game)
+            modelBuilder.Entity<GameFile>()
+                .HasOne(f => f.Game)
+                .WithMany(g => g.Files)
+                .HasForeignKey(f => f.GameId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Game -> Publisher
@@ -71,6 +80,9 @@ namespace BoardGameReviews.Data
 
             modelBuilder.Entity<Event>()
                 .HasQueryFilter(e => e.Game != null && e.Game.DeletedAt == null);
+
+            modelBuilder.Entity<GameFile>()
+                .HasQueryFilter(f => f.Game != null && f.Game.DeletedAt == null);
 
             // ── Seed data ────────────────────────────────────────────────────
 

@@ -1,17 +1,23 @@
 using BoardGameReviews.Data;
 using BoardGameReviews.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
 namespace BoardGameReviews.Controllers
 {
     public class GameController : Controller
     {
         private readonly IBoardGameRepository _repo;
+        private readonly AppDbContext _db;
+        private readonly IWebHostEnvironment _environment;
 
-        public GameController(IBoardGameRepository repo)
+        public GameController(IBoardGameRepository repo, AppDbContext db, IWebHostEnvironment environment)
         {
             _repo = repo;
+            _db = db;
+            _environment = environment;
         }
 
         public async Task<IActionResult> Index(string? search)
@@ -29,6 +35,7 @@ namespace BoardGameReviews.Controllers
             return View(model);
         }
 
+        [Authorize]
         public async Task<IActionResult> Details(int id)
         {
             var game = await _repo.GetGameWithDetailsAsync(id);
@@ -37,6 +44,7 @@ namespace BoardGameReviews.Controllers
             return View(BuildGameDetails(game));
         }
 
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public async Task<IActionResult> Create()
         {
             var model = await BuildFormViewModelAsync(new GameFormInputModel());
@@ -45,6 +53,7 @@ namespace BoardGameReviews.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public async Task<IActionResult> Create(GameFormViewModel model)
         {
             var input = model.Input;
@@ -62,6 +71,7 @@ namespace BoardGameReviews.Controllers
             return RedirectToAction(nameof(Details), new { id = game.Id });
         }
 
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public async Task<IActionResult> Edit(int id)
         {
             var game = await _repo.GetGameForEditAsync(id);
@@ -89,6 +99,7 @@ namespace BoardGameReviews.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public async Task<IActionResult> Edit(int id, GameFormViewModel model)
         {
             var input = model.Input;
@@ -127,6 +138,7 @@ namespace BoardGameReviews.Controllers
             return RedirectToAction(nameof(Details), new { id = game.Id });
         }
 
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public async Task<IActionResult> Delete(int id)
         {
             var game = await _repo.GetGameWithDetailsAsync(id);
@@ -148,6 +160,7 @@ namespace BoardGameReviews.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var game = await _repo.GetGameWithDetailsAsync(id);
@@ -176,6 +189,7 @@ namespace BoardGameReviews.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> Lookup(string entityType, string? query)
         {
             var normalizedEntityType = entityType?.Trim().ToLowerInvariant();
@@ -202,6 +216,117 @@ namespace BoardGameReviews.Controllers
                 })),
                 _ => BadRequest()
             };
+        }
+
+        [HttpGet]
+        [Authorize(Roles = IdentitySeed.AdminRole)]
+        public async Task<IActionResult> GetFiles(int id)
+        {
+            var gameExists = await _db.Games.AnyAsync(g => g.Id == id);
+            if (!gameExists)
+            {
+                return NotFound();
+            }
+
+            var files = await _db.GameFiles
+                .Where(f => f.GameId == id)
+                .OrderByDescending(f => f.UploadedAt)
+                .Select(f => new
+                {
+                    f.Id,
+                    f.OriginalFileName,
+                    f.SizeBytes,
+                    f.UploadedAt,
+                    f.RelativePath
+                })
+                .ToListAsync();
+
+            return Json(files);
+        }
+
+        [HttpPost]
+        [RequestSizeLimit(50 * 1024 * 1024)]
+        [Authorize(Roles = IdentitySeed.AdminRole)]
+        public async Task<IActionResult> UploadFile(int id, IFormFile? file)
+        {
+            var gameExists = await _db.Games.AnyAsync(g => g.Id == id);
+            if (!gameExists)
+            {
+                return NotFound(new { message = "Game not found." });
+            }
+
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest(new { message = "No file was uploaded." });
+            }
+
+            var extension = Path.GetExtension(file.FileName);
+            var storedFileName = $"{Guid.NewGuid():N}{extension}";
+
+            var uploadDirectory = Path.Combine(
+                _environment.WebRootPath,
+                "uploads",
+                "games",
+                id.ToString());
+
+            Directory.CreateDirectory(uploadDirectory);
+
+            var fullPath = Path.Combine(uploadDirectory, storedFileName);
+            await using (var stream = System.IO.File.Create(fullPath))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            var relativePath = $"/uploads/games/{id}/{storedFileName}";
+
+            var gameFile = new GameFile
+            {
+                OriginalFileName = file.FileName,
+                StoredFileName = storedFileName,
+                RelativePath = relativePath,
+                ContentType = file.ContentType,
+                SizeBytes = file.Length,
+                UploadedAt = DateTime.UtcNow,
+                GameId = id
+            };
+
+            _db.GameFiles.Add(gameFile);
+            await _db.SaveChangesAsync();
+
+            return Ok(new
+            {
+                gameFile.Id,
+                gameFile.OriginalFileName,
+                gameFile.SizeBytes,
+                gameFile.UploadedAt,
+                gameFile.RelativePath
+            });
+        }
+
+        [HttpDelete]
+        [Authorize(Roles = IdentitySeed.AdminRole)]
+        public async Task<IActionResult> DeleteFile(int id, int fileId)
+        {
+            var file = await _db.GameFiles
+                .FirstOrDefaultAsync(f => f.Id == fileId && f.GameId == id);
+
+            if (file == null)
+            {
+                return NotFound();
+            }
+
+            var relativePath = file.RelativePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+            var fullPath = Path.Combine(_environment.WebRootPath, relativePath);
+
+            if (System.IO.File.Exists(fullPath))
+            {
+                System.IO.File.Delete(fullPath);
+            }
+
+            _db.GameFiles.Remove(file);
+            await _db.SaveChangesAsync();
+
+            return NoContent();
         }
 
         private async Task<GameFormViewModel> BuildFormViewModelAsync(GameFormInputModel input)
@@ -298,6 +423,7 @@ namespace BoardGameReviews.Controllers
                 Category      = game.Category,
                 Reviews       = reviews,
                 Events        = game.Events.OrderBy(e => e.StartDateTime).ToList(),
+                Files         = game.Files.OrderByDescending(f => f.UploadedAt).ToList(),
                 AverageRating = reviews.Count > 0 ? reviews.Average(x => x.Review.Rating) : null
             };
         }
