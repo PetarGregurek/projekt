@@ -3,6 +3,7 @@ using BoardGameReviews.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
@@ -10,11 +11,27 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions
     ContentRootPath = ResolveContentRootPath()
 });
 
+var logsPath = Path.Combine(builder.Environment.ContentRootPath, "logs", "log-.txt");
+
+builder.Host.UseSerilog((context, services, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration)
+    .ReadFrom.Services(services)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File(
+        logsPath,
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 14));
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddScoped<AuditSaveChangesInterceptor>();
+
+builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) =>
+    options
+        .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+        .AddInterceptors(serviceProvider.GetRequiredService<AuditSaveChangesInterceptor>()));
 
 builder.Services
     .AddDefaultIdentity<AppUser>(options =>
@@ -70,6 +87,17 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.SameSite = SameSiteMode.Lax;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Events.OnSigningOut = context =>
+    {
+        var logger = context.HttpContext.RequestServices
+            .GetRequiredService<ILoggerFactory>()
+            .CreateLogger("Authentication");
+        var userId = context.HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var userName = context.HttpContext.User.Identity?.Name;
+
+        logger.LogInformation("User logged out. UserId: {UserId}, UserName: {UserName}", userId, userName);
+        return Task.CompletedTask;
+    };
 });
 
 builder.Services.AddScoped<IBoardGameRepository, EfBoardGameRepository>();
@@ -88,6 +116,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseSerilogRequestLogging();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -166,6 +196,11 @@ app.MapControllerRoute(
     defaults: new { controller = "Review", action = "Details" });
 
 app.MapControllerRoute(
+    name: "global-search",
+    pattern: "search",
+    defaults: new { controller = "Search", action = "Index" });
+
+app.MapControllerRoute(
     name: "privacy-page",
     pattern: "privacy",
     defaults: new { controller = "Home", action = "Privacy" });
@@ -174,13 +209,40 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    await IdentitySeed.SeedAsync(services, app.Configuration);
-}
+var appLogger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Startup");
+appLogger.LogInformation(
+    "Application started. Environment: {Environment}, ContentRootPath: {ContentRootPath}, LogsPath: {LogsPath}",
+    app.Environment.EnvironmentName,
+    app.Environment.ContentRootPath,
+    logsPath);
 
-app.Run();
+try
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+        var db = services.GetRequiredService<AppDbContext>();
+
+        if (db.Database.IsRelational())
+        {
+            await db.Database.MigrateAsync();
+        }
+
+        await IdentitySeed.SeedAsync(services, app.Configuration);
+    }
+
+    await app.RunAsync();
+}
+catch (Exception ex)
+{
+    appLogger.LogError(ex, "Application stopped unexpectedly.");
+    throw;
+}
+finally
+{
+    appLogger.LogInformation("Application stopped.");
+    Log.CloseAndFlush();
+}
 
 static string ResolveContentRootPath()
 {

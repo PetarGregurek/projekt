@@ -87,11 +87,23 @@ namespace BoardGameReviews.Areas.Identity.Pages.Account
 
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("User created a new account with password.");
+                    _logger.LogInformation(
+                        "User registered a new account. UserId: {UserId}, Email: {Email}",
+                        user.Id,
+                        Input.Email);
                     await _userManager.AddToRoleAsync(user, IdentitySeed.UserRole);
                     await _signInManager.SignInAsync(user, isPersistent: false);
+                    _logger.LogInformation(
+                        "User logged in after registration. UserId: {UserId}, Email: {Email}",
+                        user.Id,
+                        Input.Email);
                     return LocalRedirect(returnUrl);
                 }
+
+                _logger.LogWarning(
+                    "User registration failed for {Email}. Errors: {Errors}",
+                    Input.Email,
+                    string.Join("; ", result.Errors.Select(error => error.Description)));
 
                 foreach (var error in result.Errors)
                 {

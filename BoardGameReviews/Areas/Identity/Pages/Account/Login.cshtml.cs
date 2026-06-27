@@ -91,10 +91,15 @@ namespace BoardGameReviews.Areas.Identity.Pages.Account
             var result = await _signInManager.PasswordSignInAsync(username, Input.Password, Input.RememberMe, lockoutOnFailure: false);
             if (result.Succeeded)
             {
-                _logger.LogInformation("User logged in.");
+                var user = await _userManager.FindByNameAsync(username);
+                _logger.LogInformation(
+                    "User logged in. UserId: {UserId}, UserName: {UserName}",
+                    user?.Id,
+                    username);
                 return LocalRedirect(returnUrl);
             }
 
+            _logger.LogWarning("Failed login attempt for {Login}.", normalizedLogin);
             ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             return Page();

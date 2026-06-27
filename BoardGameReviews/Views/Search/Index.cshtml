@@ -1,0 +1,72 @@
+@model GlobalSearchViewModel
+
+@{
+    ViewData["Title"] = "Search";
+}
+
+<section class="game-page search-page">
+    <div class="game-hero mb-4">
+        <p class="eyebrow mb-2">BoardGameReviews</p>
+        <h1 class="mb-2">Search</h1>
+        @if (Model.HasQuery)
+        {
+            <p class="mb-0">Results for <strong>@Model.Query</strong></p>
+        }
+    </div>
+
+    <div class="search-panel mb-4">
+        <form class="search-page-form" asp-controller="Search" asp-action="Index" method="get">
+            <label class="form-label" for="global-search-page-input">Global search</label>
+            <div class="search-page-form__row">
+                <input id="global-search-page-input"
+                       class="form-control"
+                       type="search"
+                       name="q"
+                       value="@Model.Query"
+                       placeholder="Search menu, pages, games, users, reviews, events..." />
+                <button class="btn game-btn-primary" type="submit">Search</button>
+            </div>
+        </form>
+    </div>
+
+    @if (!Model.HasQuery)
+    {
+        <div class="search-empty">
+            Start typing to search menu items, pages, and application data.
+        </div>
+    }
+    else if (Model.TotalResults == 0)
+    {
+        <div class="search-empty">
+            No results found.
+        </div>
+    }
+    else
+    {
+        <div class="search-summary mb-3">@Model.TotalResults result(s)</div>
+
+        <div class="search-results">
+            @foreach (var group in Model.Groups)
+            {
+                <section class="search-group">
+                    <div class="entity-header">@group.Name</div>
+                    <div class="search-result-list">
+                        @foreach (var result in group.Results)
+                        {
+                            <a class="search-result" href="@result.Url">
+                                <span class="search-result__type">@result.Type</span>
+                                <span class="search-result__body">
+                                    <span class="search-result__title">@result.Title</span>
+                                    @if (!string.IsNullOrWhiteSpace(result.Description))
+                                    {
+                                        <span class="search-result__description">@result.Description</span>
+                                    }
+                                </span>
+                            </a>
+                        }
+                    </div>
+                </section>
+            }
+        </div>
+    }
+</section>

@@ -235,6 +235,109 @@
   font-weight: 600;
 }
 
+.search-panel,
+.search-empty,
+.search-summary,
+.search-group {
+  background: #fff;
+  border: 1px solid #d8e5ef;
+  border-radius: 14px;
+  box-shadow: 0 8px 22px rgba(18, 40, 65, 0.07);
+}
+
+.search-panel,
+.search-empty,
+.search-summary {
+  padding: 1rem;
+}
+
+.search-page-form__row {
+  display: flex;
+  gap: 0.65rem;
+}
+
+.search-page-form__row .form-control {
+  flex: 1 1 auto;
+}
+
+.search-page-form__row .btn {
+  flex: 0 0 auto;
+}
+
+.search-empty {
+  color: #5f7081;
+  font-weight: 600;
+}
+
+.search-summary {
+  display: inline-flex;
+  color: #1f2e3d;
+  font-weight: 700;
+}
+
+.search-results {
+  display: grid;
+  gap: 1rem;
+}
+
+.search-group {
+  overflow: hidden;
+}
+
+.search-result-list {
+  display: grid;
+}
+
+.search-result {
+  display: grid;
+  grid-template-columns: 6rem 1fr;
+  gap: 0.85rem;
+  padding: 0.9rem 1rem;
+  text-decoration: none;
+  color: #17212b;
+  border-bottom: 1px solid #e3edf4;
+  background: #fff;
+}
+
+.search-result:last-child {
+  border-bottom: 0;
+}
+
+.search-result:hover,
+.search-result:focus-visible {
+  background: #eef7f5;
+}
+
+.search-result__type {
+  align-self: start;
+  justify-self: start;
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+  background: #e6faf7;
+  color: #0f766e;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.search-result__body {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.search-result__title {
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.search-result__description {
+  color: #5f7081;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
 .autocomplete-dropdown {
   position: relative;
 }
@@ -388,5 +491,180 @@ textarea.field-missing {
   .game-btn-primary,
   .game-btn-outline {
     width: 100%;
+  }
+
+  .search-page-form__row {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .search-result {
+    grid-template-columns: 1fr;
+    gap: 0.45rem;
+  }
+}
+
+/* Responsive entity pages */
+.game-page {
+  min-width: 0;
+}
+
+.game-page h1 {
+  overflow-wrap: anywhere;
+}
+
+.game-card,
+.game-table-wrap,
+.game-hero {
+  min-width: 0;
+}
+
+.game-card p,
+.list-group-item,
+.game-table td {
+  overflow-wrap: anywhere;
+}
+
+.table-responsive {
+  -webkit-overflow-scrolling: touch;
+}
+
+.game-table {
+  min-width: 46rem;
+}
+
+.game-list-page .game-table {
+  min-width: 58rem;
+}
+
+.game-files-table {
+  min-width: 34rem;
+}
+
+.game-table-wrap .table-responsive {
+  scrollbar-color: #8da7bd #eef5fa;
+}
+
+.game-form-page .game-card {
+  max-width: 58rem;
+}
+
+.game-form-page form {
+  min-width: 0;
+}
+
+.game-form-grid > div {
+  min-width: 0;
+}
+
+.game-form-actions .btn {
+  min-height: 2.7rem;
+}
+
+@media (min-width: 768px) {
+  .game-details-page .game-hero > .btn,
+  .game-details-page .game-hero > .d-flex {
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .game-hero {
+    border-radius: 14px;
+    padding: 0.95rem;
+  }
+
+  .game-hero h1 {
+    font-size: 1.8rem;
+    line-height: 1.12;
+  }
+
+  .game-hero.d-flex,
+  .game-hero .d-flex {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .game-hero .btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .list-toolbar {
+    padding: 0.85rem;
+  }
+
+  .list-search-input {
+    max-width: none;
+  }
+
+  .game-table-wrap {
+    border-radius: 14px;
+  }
+
+  .table-responsive {
+    margin: 0;
+  }
+
+  .game-table th,
+  .game-table td {
+    padding: 0.55rem;
+  }
+
+  .table-actions {
+    width: 6.5rem;
+  }
+
+  .card-header,
+  .card-body {
+    padding: 0.85rem;
+  }
+
+  .game-card {
+    border-radius: 12px;
+  }
+
+  .list-group-item.d-flex {
+    align-items: stretch;
+  }
+
+  .list-group-item .btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .game-form-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .autocomplete-dropdown__panel {
+    position: static;
+    margin-top: 0.35rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .entity-header {
+    padding: 0.65rem 0.8rem;
+  }
+
+  .game-form-grid {
+    gap: 0.8rem;
+  }
+
+  .dtp-inputs {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dtp-date-input,
+  .dtp-time-input {
+    flex-basis: auto;
+    width: 100%;
+  }
+
+  .dtp-sep {
+    display: none;
   }
 }
