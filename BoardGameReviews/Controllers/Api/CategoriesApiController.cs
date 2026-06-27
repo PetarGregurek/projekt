@@ -1,6 +1,7 @@
 using BoardGameReviews.Data;
 using BoardGameReviews.Dtos;
 using BoardGameReviews.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -122,6 +123,7 @@ public class CategoriesApiController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = IdentitySeed.AdminRole)]
     public async Task<ActionResult<CategoryDto>> Create([FromBody] CategoryUpsertDto dto)
     {
         var category = new Category
@@ -149,6 +151,7 @@ public class CategoriesApiController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Roles = IdentitySeed.AdminRole)]
     public async Task<IActionResult> Update(int id, [FromBody] CategoryUpsertDto dto)
     {
         var category = await _db.Categories.FirstOrDefaultAsync(c => c.Id == id);
@@ -168,6 +171,7 @@ public class CategoriesApiController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = IdentitySeed.AdminRole)]
     public async Task<IActionResult> Delete(int id)
     {
         var category = await _db.Categories

@@ -1,6 +1,7 @@
 using BoardGameReviews.Data;
 using BoardGameReviews.Dtos;
 using BoardGameReviews.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -104,6 +105,7 @@ public class PublishersApiController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = IdentitySeed.AdminRole)]
     public async Task<ActionResult<PublisherDto>> Create([FromBody] PublisherUpsertDto dto)
     {
         var publisher = new Publisher
@@ -125,6 +127,7 @@ public class PublishersApiController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Roles = IdentitySeed.AdminRole)]
     public async Task<IActionResult> Update(int id, [FromBody] PublisherUpsertDto dto)
     {
         var publisher = await _db.Publishers.FirstOrDefaultAsync(p => p.Id == id);
@@ -141,6 +144,7 @@ public class PublishersApiController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = IdentitySeed.AdminRole)]
     public async Task<IActionResult> Delete(int id)
     {
         var publisher = await _db.Publishers

@@ -1,6 +1,7 @@
 using BoardGameReviews.Data;
 using BoardGameReviews.Dtos;
 using BoardGameReviews.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -164,6 +165,7 @@ public class GamesApiController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = IdentitySeed.AdminRole)]
     public async Task<ActionResult<GameDto>> Create([FromBody] GameUpsertDto dto)
     {
         if (dto.MaxPlayers < dto.MinPlayers)
@@ -209,6 +211,7 @@ public class GamesApiController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Roles = IdentitySeed.AdminRole)]
     public async Task<IActionResult> Update(int id, [FromBody] GameUpsertDto dto)
     {
         if (dto.MaxPlayers < dto.MinPlayers)
@@ -244,6 +247,7 @@ public class GamesApiController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = IdentitySeed.AdminRole)]
     public async Task<IActionResult> Delete(int id)
     {
         var game = await _db.Games

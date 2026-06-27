@@ -1,5 +1,6 @@
 using BoardGameReviews.Data;
 using BoardGameReviews.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BoardGameReviews.Controllers
@@ -38,9 +39,11 @@ namespace BoardGameReviews.Controllers
             return View(new EventDetailsViewModel { Event = evt, Game = evt.Game });
         }
 
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public IActionResult Create() => View(new EventFormViewModel());
 
         [HttpPost, ValidateAntiForgeryToken]
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public async Task<IActionResult> Create(EventFormViewModel model)
         {
             await ValidateEventInputAsync(model.Input);
@@ -58,6 +61,7 @@ namespace BoardGameReviews.Controllers
             return RedirectToAction(nameof(Details), new { id = evt.Id });
         }
 
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public async Task<IActionResult> Edit(int id)
         {
             var evt = await _repo.GetEventWithGameAsync(id);
@@ -75,6 +79,7 @@ namespace BoardGameReviews.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public async Task<IActionResult> Edit(int id, EventFormViewModel model)
         {
             if (id != model.Input.Id) return BadRequest();
@@ -92,6 +97,7 @@ namespace BoardGameReviews.Controllers
             return RedirectToAction(nameof(Details), new { id });
         }
 
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public async Task<IActionResult> Delete(int id)
         {
             var evt = await _repo.GetEventWithGameAsync(id);
@@ -100,6 +106,7 @@ namespace BoardGameReviews.Controllers
         }
 
         [HttpPost, ActionName("Delete"), ValidateAntiForgeryToken]
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var evt = await _repo.GetEventWithGameAsync(id);

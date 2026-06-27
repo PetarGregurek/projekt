@@ -1,5 +1,6 @@
 using BoardGameReviews.Data;
 using BoardGameReviews.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BoardGameReviews.Controllers
@@ -41,9 +42,11 @@ namespace BoardGameReviews.Controllers
             return View(new ReviewDetailsViewModel { Review = review, Game = review.Game, User = review.User });
         }
 
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public IActionResult Create() => View(new ReviewFormViewModel());
 
         [HttpPost, ValidateAntiForgeryToken]
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public async Task<IActionResult> Create(ReviewFormViewModel model)
         {
             await ValidateReviewInputAsync(model.Input);
@@ -63,6 +66,7 @@ namespace BoardGameReviews.Controllers
             return RedirectToAction(nameof(Details), new { id = review.Id });
         }
 
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public async Task<IActionResult> Edit(int id)
         {
             var review = await _repo.GetReviewWithDetailsAsync(id);
@@ -83,6 +87,7 @@ namespace BoardGameReviews.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public async Task<IActionResult> Edit(int id, ReviewFormViewModel model)
         {
             if (id != model.Input.Id) return BadRequest();
@@ -102,6 +107,7 @@ namespace BoardGameReviews.Controllers
             return RedirectToAction(nameof(Details), new { id });
         }
 
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public async Task<IActionResult> Delete(int id)
         {
             var review = await _repo.GetReviewWithDetailsAsync(id);
@@ -114,6 +120,7 @@ namespace BoardGameReviews.Controllers
         }
 
         [HttpPost, ActionName("Delete"), ValidateAntiForgeryToken]
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var review = await _repo.GetReviewWithDetailsAsync(id);

@@ -1,5 +1,6 @@
 using BoardGameReviews.Data;
 using BoardGameReviews.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BoardGameReviews.Controllers
@@ -35,9 +36,11 @@ namespace BoardGameReviews.Controllers
             });
         }
 
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public IActionResult Create() => View(new PublisherFormViewModel());
 
         [HttpPost, ValidateAntiForgeryToken]
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public async Task<IActionResult> Create(PublisherFormViewModel model)
         {
             if (!ModelState.IsValid) return View(model);
@@ -47,6 +50,7 @@ namespace BoardGameReviews.Controllers
             return RedirectToAction(nameof(Details), new { id = publisher.Id });
         }
 
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public async Task<IActionResult> Edit(int id)
         {
             var publisher = await _repo.GetPublisherWithGamesAsync(id);
@@ -58,6 +62,7 @@ namespace BoardGameReviews.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public async Task<IActionResult> Edit(int id, PublisherFormViewModel model)
         {
             if (id != model.Input.Id) return BadRequest();
@@ -71,6 +76,7 @@ namespace BoardGameReviews.Controllers
             return RedirectToAction(nameof(Details), new { id });
         }
 
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public async Task<IActionResult> Delete(int id)
         {
             var publisher = await _repo.GetPublisherWithGamesAsync(id);
@@ -84,6 +90,7 @@ namespace BoardGameReviews.Controllers
         }
 
         [HttpPost, ActionName("Delete"), ValidateAntiForgeryToken]
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var publisher = await _repo.GetPublisherWithGamesAsync(id);

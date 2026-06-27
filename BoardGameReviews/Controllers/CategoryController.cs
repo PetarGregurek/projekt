@@ -1,5 +1,6 @@
 using BoardGameReviews.Data;
 using BoardGameReviews.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -36,9 +37,11 @@ namespace BoardGameReviews.Controllers
             });
         }
 
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public IActionResult Create() => View(BuildFormViewModel(new CategoryFormInputModel()));
 
         [HttpPost, ValidateAntiForgeryToken]
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public async Task<IActionResult> Create(CategoryFormViewModel model)
         {
             if (!ModelState.IsValid) return View(BuildFormViewModel(model.Input));
@@ -55,6 +58,7 @@ namespace BoardGameReviews.Controllers
             return RedirectToAction(nameof(Details), new { id = category.Id });
         }
 
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public async Task<IActionResult> Edit(int id)
         {
             var category = await _repo.GetCategoryWithGamesAsync(id);
@@ -67,6 +71,7 @@ namespace BoardGameReviews.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public async Task<IActionResult> Edit(int id, CategoryFormViewModel model)
         {
             if (id != model.Input.Id) return BadRequest();
@@ -83,6 +88,7 @@ namespace BoardGameReviews.Controllers
             return RedirectToAction(nameof(Details), new { id });
         }
 
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public async Task<IActionResult> Delete(int id)
         {
             var category = await _repo.GetCategoryWithGamesAsync(id);
@@ -96,6 +102,7 @@ namespace BoardGameReviews.Controllers
         }
 
         [HttpPost, ActionName("Delete"), ValidateAntiForgeryToken]
+        [Authorize(Roles = IdentitySeed.AdminRole)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var category = await _repo.GetCategoryWithGamesAsync(id);

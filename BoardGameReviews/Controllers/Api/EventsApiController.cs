@@ -1,6 +1,7 @@
 using BoardGameReviews.Data;
 using BoardGameReviews.Dtos;
 using BoardGameReviews.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -105,6 +106,7 @@ public class EventsApiController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = IdentitySeed.AdminRole)]
     public async Task<ActionResult<EventDto>> Create([FromBody] EventUpsertDto dto)
     {
         if (dto.EndDateTime <= dto.StartDateTime)
@@ -140,6 +142,7 @@ public class EventsApiController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Roles = IdentitySeed.AdminRole)]
     public async Task<IActionResult> Update(int id, [FromBody] EventUpsertDto dto)
     {
         if (dto.EndDateTime <= dto.StartDateTime)
@@ -169,6 +172,7 @@ public class EventsApiController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = IdentitySeed.AdminRole)]
     public async Task<IActionResult> Delete(int id)
     {
         var evt = await _db.Events.FirstOrDefaultAsync(e => e.Id == id);

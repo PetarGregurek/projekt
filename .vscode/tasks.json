@@ -1,0 +1,158 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "diagnose-build-failure",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"build",
+				".\\projekt.sln",
+				"-c",
+				"Debug"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$msCompile"
+			]
+		},
+		{
+			"label": "check-port-owner-7103",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$port=7103; $lines = netstat -ano | findstr \":$port\"; if (-not $lines) { Write-Output \"No listeners found on port $port\"; exit 0 }; $lines; $pids = $lines | ForEach-Object { ($_ -split '\\s+')[-1] } | Where-Object { $_ -match '^[0-9]+$' } | Select-Object -Unique; foreach ($pid in $pids) { tasklist /FI \"PID eq $pid\" }"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "netstat-7103",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"netstat -ano | findstr :7103"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "tasklist-26260",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"tasklist /FI \"PID eq 26260\" & tasklist /FI \"PID eq 4600\""
+			],
+			"isBackground": false
+		},
+		{
+			"label": "owner-processes-7103",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Get-Process -Id 26260,4600 | Select-Object Id, ProcessName | Format-Table -AutoSize"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "build-after-auth-updates",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"build",
+				".\\projekt.sln",
+				"-c",
+				"Debug"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$msCompile"
+			]
+		},
+		{
+			"label": "kill-running-app-and-rebuild",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Stop-Process -Id 19516 -Force; dotnet build .\\projekt.sln -c Debug"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$msCompile"
+			]
+		},
+		{
+			"label": "run-integration-tests-check",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"test",
+				".\\BoardGameReviews.IntegrationTests\\BoardGameReviews.IntegrationTests.csproj",
+				"-c",
+				"Debug",
+				"--no-build"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "build-api-auth-change",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"build",
+				".\\BoardGameReviews\\BoardGameReviews.csproj",
+				"-c",
+				"Debug"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$msCompile"
+			]
+		},
+		{
+			"label": "rebuild-after-stopping-running-app",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Stop-Process -Id 15628 -Force; dotnet build .\\BoardGameReviews\\BoardGameReviews.csproj -c Debug"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$msCompile"
+			]
+		},
+		{
+			"label": "integration-tests-after-api-auth",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"test",
+				".\\BoardGameReviews.IntegrationTests\\BoardGameReviews.IntegrationTests.csproj",
+				"-c",
+				"Debug",
+				"--no-build"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "integration-tests-rebuild-after-api-auth",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"test",
+				".\\BoardGameReviews.IntegrationTests\\BoardGameReviews.IntegrationTests.csproj",
+				"-c",
+				"Debug"
+			],
+			"isBackground": false
+		}
+	]
+}
