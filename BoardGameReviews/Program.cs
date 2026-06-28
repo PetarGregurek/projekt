@@ -1,5 +1,6 @@
 using BoardGameReviews.Data;
 using BoardGameReviews.Models;
+using BoardGameReviews.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -101,6 +102,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddScoped<IBoardGameRepository, EfBoardGameRepository>();
+builder.Services.AddHttpClient<IAiFormAssistant, OpenAiFormAssistant>();
 
 var app = builder.Build();
 

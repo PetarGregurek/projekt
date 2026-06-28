@@ -1,0 +1,22 @@
+@model BoardGameReviews.Models.AiFormPromptViewModel
+
+<div class="ai-form-assistant" data-ai-form data-ai-entity="@Model.EntityType">
+    <div class="ai-form-assistant__header">
+        <div>
+            <div class="eyebrow">AI input</div>
+            <h2>@Model.Title</h2>
+        </div>
+        <button type="button" class="btn game-btn-outline ai-form-assistant__button" data-ai-generate>
+            Generate
+        </button>
+    </div>
+
+    <label class="form-label" for="ai-prompt-@Model.EntityType">Prompt</label>
+    <textarea id="ai-prompt-@Model.EntityType"
+              class="form-control"
+              rows="3"
+              maxlength="2000"
+              placeholder="@Model.Placeholder"
+              data-ai-prompt></textarea>
+    <div class="ai-form-assistant__status" data-ai-status aria-live="polite"></div>
+</div>

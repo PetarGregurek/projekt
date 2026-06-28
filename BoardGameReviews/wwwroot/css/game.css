@@ -174,6 +174,50 @@
   text-align: center;
 }
 
+.ai-form-assistant {
+  display: grid;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: #f8fbff;
+  border: 1px solid #d4e3ef;
+  border-radius: 8px;
+}
+
+.ai-form-assistant__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.ai-form-assistant__header h2 {
+  margin: 0.1rem 0 0;
+  color: #1f2e3d;
+  font-size: 1.05rem;
+  line-height: 1.25;
+}
+
+.ai-form-assistant__button {
+  flex: 0 0 auto;
+  min-width: 7rem;
+}
+
+.ai-form-assistant__status {
+  min-height: 1.35rem;
+  color: #51677a;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.ai-form-assistant__status[data-state="success"] {
+  color: #0d5a42;
+}
+
+.ai-form-assistant__status[data-state="error"] {
+  color: #9d1c30;
+}
+
 .list-toolbar {
   display: flex;
   align-items: end;
@@ -636,6 +680,15 @@ textarea.field-missing {
   .game-form-actions {
     display: grid;
     grid-template-columns: 1fr;
+  }
+
+  .ai-form-assistant__header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .ai-form-assistant__button {
+    width: 100%;
   }
 
   .autocomplete-dropdown__panel {

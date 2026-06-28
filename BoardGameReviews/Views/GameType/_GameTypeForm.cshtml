@@ -2,6 +2,13 @@
 
 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
+@await Html.PartialAsync("_AiFormPrompt", new BoardGameReviews.Models.AiFormPromptViewModel
+{
+    EntityType = "gametype",
+    Title = "Generate game type data",
+    Placeholder = "Example: Create a tile placement game type with a short description."
+})
+
 <div class="game-form-grid">
     <div>
         <label asp-for="Input.Name" class="form-label"></label>

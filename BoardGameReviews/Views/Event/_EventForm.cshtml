@@ -2,6 +2,13 @@
 
 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
+@await Html.PartialAsync("_AiFormPrompt", new BoardGameReviews.Models.AiFormPromptViewModel
+{
+    EntityType = "event",
+    Title = "Generate event data",
+    Placeholder = "Example: Schedule a Catan tournament next Friday from 18:00 to 22:00 in Zagreb for an existing game."
+})
+
 <div class="game-form-grid">
     <div>
         <label asp-for="Input.Name" class="form-label"></label>

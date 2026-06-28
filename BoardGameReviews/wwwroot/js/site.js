@@ -1103,11 +1103,162 @@ const applyServerSideValidationStyles = () => {
 	});
 };
 
+const parseAiBoolean = (value) => {
+	if (typeof value === 'boolean') {
+		return value;
+	}
+
+	return ['true', '1', 'yes', 'recommended'].includes(String(value || '').trim().toLowerCase());
+};
+
+const formatAiDateSummary = (value) => {
+	const match = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+	if (!match) {
+		return value;
+	}
+
+	const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), Number(match[4]), Number(match[5]));
+	if (Number.isNaN(date.getTime())) {
+		return value;
+	}
+
+	return new Intl.DateTimeFormat(navigator.language || 'en', {
+		dateStyle: 'medium',
+		timeStyle: 'short'
+	}).format(date);
+};
+
+const setAiFieldValue = (form, item) => {
+	const fieldName = item.field;
+	const value = item.value ?? '';
+	const field = form.querySelector(`[name="${fieldName}"]`);
+
+	if (!field) {
+		return;
+	}
+
+	if (field.type === 'checkbox') {
+		field.checked = parseAiBoolean(value);
+		field.dispatchEvent(new Event('change', { bubbles: true }));
+		return;
+	}
+
+	field.value = value;
+	field.classList.remove('field-missing');
+	field.dispatchEvent(new Event('input', { bubbles: true }));
+	field.dispatchEvent(new Event('change', { bubbles: true }));
+
+	const autocompleteRoot = field.closest('[data-autocomplete-dropdown]');
+	if (autocompleteRoot) {
+		const textInput = autocompleteRoot.querySelector('[data-autocomplete-input]');
+		const validation = autocompleteRoot.querySelector('[data-autocomplete-validation]');
+		const displayValue = item.displayValue || value;
+
+		if (textInput) {
+			textInput.value = displayValue;
+			textInput.classList.remove('field-missing');
+		}
+
+		if (validation) {
+			validation.textContent = '';
+			validation.classList.add('autocomplete-dropdown__validation--hidden');
+		}
+	}
+
+	const dtpRoot = field.closest('[data-dtp]');
+	if (dtpRoot) {
+		const summary = dtpRoot.querySelector('[data-dtp-summary]');
+		const trigger = dtpRoot.querySelector('[data-dtp-trigger]');
+		const validation = dtpRoot.querySelector('[data-dtp-validation]');
+
+		if (summary) {
+			summary.textContent = formatAiDateSummary(value);
+		}
+
+		if (trigger) {
+			trigger.classList.remove('field-missing');
+		}
+
+		if (validation) {
+			validation.textContent = '';
+			validation.classList.remove('field-validation-error');
+			validation.classList.add('field-validation-valid');
+		}
+	}
+};
+
+const wireAiFormAssistants = () => {
+	document.querySelectorAll('[data-ai-form]').forEach((root) => {
+		if (root.dataset.aiBound === 'true') {
+			return;
+		}
+
+		root.dataset.aiBound = 'true';
+		const form = root.closest('form');
+		const entityType = root.dataset.aiEntity;
+		const promptField = root.querySelector('[data-ai-prompt]');
+		const generateButton = root.querySelector('[data-ai-generate]');
+		const status = root.querySelector('[data-ai-status]');
+
+		if (!form || !entityType || !promptField || !generateButton || !status) {
+			return;
+		}
+
+		const setStatus = (message, state = '') => {
+			status.textContent = message;
+			status.dataset.state = state;
+		};
+
+		generateButton.addEventListener('click', async () => {
+			const prompt = promptField.value.trim();
+			if (prompt.length < 5) {
+				setStatus('Enter a more specific prompt first.', 'error');
+				applyFieldState(promptField, 'missing');
+				return;
+			}
+
+			const token = form.querySelector('input[name="__RequestVerificationToken"]')?.value;
+			generateButton.disabled = true;
+			setStatus('Generating suggestion...', 'loading');
+
+			try {
+				const response = await fetch('/Ai/Suggest', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'RequestVerificationToken': token || ''
+					},
+					body: JSON.stringify({ entityType, prompt })
+				});
+
+				const result = await response.json().catch(() => ({}));
+				if (!response.ok) {
+					setStatus(result.message || 'AI suggestion failed.', 'error');
+					return;
+				}
+
+				(result.fields || []).forEach((item) => setAiFieldValue(form, item));
+				const filledCount = (result.fields || []).length;
+				const note = result.notes ? ` ${result.notes}` : '';
+				setStatus(`Filled ${filledCount} field${filledCount === 1 ? '' : 's'}.${note}`, 'success');
+
+				form.querySelectorAll('input, select, textarea').forEach((field) => validateNativeField(field));
+				validatePlayersRelation(form, false);
+			} catch {
+				setStatus('AI suggestion could not be loaded.', 'error');
+			} finally {
+				generateButton.disabled = false;
+			}
+		});
+	});
+};
+
 document.addEventListener('DOMContentLoaded', () => {
 	wireAjaxSearch();
 	wireFieldFeedback();
 	wireAutocompleteDropdowns();
 	wireDateTimePickers();
+	wireAiFormAssistants();
 	wireFormSubmit();
 	applyServerSideValidationStyles();
 
